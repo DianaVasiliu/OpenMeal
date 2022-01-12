@@ -22,7 +22,6 @@ public:
 	int verticesCount;
 
 	std::vector<float> Vertices;
-	std::vector<objl::Mesh> Meshes;
 	std::vector<std::vector<float>> MeshVertices;
 
 };
