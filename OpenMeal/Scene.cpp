@@ -1,4 +1,5 @@
 #include "Scene.h"
+#include "Model.h"
 #include "loadShaders.h"
 #include "objloader.hpp"
 
@@ -111,7 +112,7 @@ void Scene::InitializeLibraries() {
 
 	glutInitContextVersion(4, 4);
 
-	glutCreateWindow("Desenarea unui cub folosind testul de adancime");
+	glutCreateWindow("OpenMeal");
 	glewInit();
 
 	glutDisplayFunc(renderCallback);
@@ -123,34 +124,20 @@ void Scene::InitializeLibraries() {
 }
 
 void Scene::InitializeScene() {
-	glClearColor(1.0f, 1.0f, 1.0f, 0.0f); // culoarea de fond a ecranului
+	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
 
-	bool res = loadOBJ("Sfera.obj", vertices, uvs, normals);
-	bool res2 = loadOBJ("cube.obj", cubeVertices, cubeUvs, cubeNormals);
+	Model* sphere = new Model("Sfera.obj");
+	Model* cube = new Model("cube.obj");
 
-	for (int i = 0; i < vertices.size(); i++) {
-		Vertices.push_back(vertices[i].x);
-		Vertices.push_back(vertices[i].y);
-		Vertices.push_back(vertices[i].z);
-		Vertices.push_back(uvs[i].x);
-		Vertices.push_back(uvs[i].y);
-	}
-
-	for (int i = 0; i < cubeVertices.size(); i++) {
-		CubeVertices.push_back(cubeVertices[i].x);
-		CubeVertices.push_back(cubeVertices[i].y);
-		CubeVertices.push_back(cubeVertices[i].z);
-		CubeVertices.push_back(cubeUvs[i].x);
-		CubeVertices.push_back(cubeUvs[i].y);
-	}
-
-	//cout << vertices.size() << " " << Vertices.size() << " \n\n\n";
+	models.push_back(sphere);
+	models.push_back(cube);
 
 	// Creare VBO+shader
 	CreateVBO();
 	CreateShaders("tex.vert", "tex.frag");
 
-	LoadTexture(Texture, "green_circle.png");
+	LoadTexture(GreenCircleTexture, "green_circle.png");
+	LoadTexture(LavaTexture, "lava.png");
 
 	// Locatii ptr shader
 	myMatrixLocation = glGetUniformLocation(ProgramId, "myMatrix");
@@ -171,77 +158,71 @@ void Scene::RenderFunction() {
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_TEXTURE_2D);
 
-	//CreateVBO(); // decomentati acest rand daca este cazul 
-	glBindVertexArray(VaoId);
-	glBindBuffer(GL_ARRAY_BUFFER, VboId);
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EboId);
+	// drawing the first object (the sphere)
+	int i = 0;
+	glBindVertexArray(models[i]->VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, models[i]->VAO);
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, Texture);
+	glBindTexture(GL_TEXTURE_2D, GreenCircleTexture);
 	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);
 
+	// set the sphere's position
 	myMatrix = glm::mat4(1.0f);
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 
-	// matricea de vizualizare
-	Obs = glm::vec3(Obsx, Obsy, Obsz); // pozitia observatorului	
+	Obs = glm::vec3(Obsx, Obsy, Obsz); 
 	Refx = Obsx; Refy = Obsy;
-	PctRef = glm::vec3(Refx, Refy, 800); // pozitia punctului de referinta
-	Vert = glm::vec3(Vx, 1.0f, 0.0f); // verticala din planul de vizualizare 
+	PctRef = glm::vec3(Refx, Refy, 800);
+	Vert = glm::vec3(Vx, 1.0f, 0.0f);
 	view = glm::lookAt(Obs, PctRef, Vert);
 	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, &view[0][0]);
 
-	// matricea de proiectie, pot fi testate si alte variante
 	projection = glm::perspective(fov, GLfloat(width) / GLfloat(height), znear, zfar);
 	glUniformMatrix4fv(projLocation, 1, GL_FALSE, &projection[0][0]);
 
+	// draw the sphere
+	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
 
-	// Fetele
-	glDrawArrays(GL_TRIANGLES, 0, 4104);
+	/////////////////////////////////////////////////////////////////////////////////
 
-	glBindVertexArray(CubeVao);
+	// drawing the second object (the cube)
+	i++;
+	glBindVertexArray(models[i]->VAO);
 
+	// set the cube's position
 	myMatrix = glm::translate(glm::vec3(-5, 0, 0));
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 
-	//glBindBuffer(GL_ARRAY_BUFFER, CubeVboId);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
+	// new texture for the cube
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, LavaTexture);
+	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 1);	// also works with the same texture index (0 instead of 1 and GL_TEXTURE0)
+
+	// draw the cube
+	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
+
+	/////////////////////////////////////////////////////////////////////////////////
 
 	glDisable(GL_TEXTURE_2D);
-
 	glutSwapBuffers();
 	glFlush();
 }
 
 void Scene::CreateVBO() {
-	glGenVertexArrays(1, &VaoId);
-	glBindVertexArray(VaoId);
+	for (int i = 0; i < models.size(); i++) {
+		glGenVertexArrays(1, &models[i]->VAO);
+		glBindVertexArray(models[i]->VAO);
 
-	// generare VAO/buffere
-	glGenBuffers(1, &VboId);
-	glBindBuffer(GL_ARRAY_BUFFER, VboId);
-	glBufferData(GL_ARRAY_BUFFER, Vertices.size() * sizeof(float), &Vertices[0], GL_STATIC_DRAW);
-	
-	// se activeaza lucrul cu atribute; 
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (const GLvoid*)(3 * sizeof(float)));
+		glGenBuffers(1, &models[i]->VBO);
+		glBindBuffer(GL_ARRAY_BUFFER, models[i]->VBO);
+		glBufferData(GL_ARRAY_BUFFER, models[i]->Vertices.size() * sizeof(float), &models[i]->Vertices[0], GL_STATIC_DRAW);
 
-	glGenVertexArrays(1, &CubeVao);
-	glBindVertexArray(CubeVao);
-
-	glGenBuffers(1, &CubeVboId);
-	glBindBuffer(GL_ARRAY_BUFFER, CubeVboId);
-	glBufferData(GL_ARRAY_BUFFER, CubeVertices.size() * sizeof(float), &CubeVertices[0], GL_STATIC_DRAW);
-
-
-	// se activeaza lucrul cu atribute; 
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (const GLvoid*)(3 * sizeof(float)));
-
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (const GLvoid*)(3 * sizeof(float)));
+	}
 }
 
 void Scene::DestroyShaders()
@@ -254,5 +235,7 @@ void Scene::DestroyVBO()
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glDeleteBuffers(1, &VboId);
+	for (int i = 0; i < models.size(); i++) {
+		glDeleteBuffers(1, &models[i]->VBO);
+	}
 }

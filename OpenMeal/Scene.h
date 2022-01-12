@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Model.h"
+
 #include <vector>
 #include <GL/glew.h>
 #include <GL/freeglut.h>
@@ -30,28 +32,14 @@ public:
 	glm::mat4 view, projection, myMatrix;
 
 	GLuint
-		VaoId,
-		CubeVao,
-		VboId,
-		CubeVboId,
-		EboId,
-		Texture,
+		GreenCircleTexture,
+		LavaTexture,
 		ProgramId,
 		viewLocation,
 		projLocation,
-		myMatrixLocation,
-		codColLocation;
+		myMatrixLocation;
 
-
-	std::vector< glm::vec3 > vertices;
-	std::vector< glm::vec2 > uvs;
-	std::vector< glm::vec3 > normals;
-	std::vector<float> Vertices;
-
-	std::vector< glm::vec3 > cubeVertices;
-	std::vector< glm::vec2 > cubeUvs;
-	std::vector< glm::vec3 > cubeNormals;
-	std::vector<float> CubeVertices;
+	std::vector<Model*> models;
 
 	static Scene* getInstance();
 
