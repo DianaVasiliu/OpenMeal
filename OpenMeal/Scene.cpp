@@ -56,10 +56,22 @@ void processNormalKeys(unsigned char key, int x, int y) {
 		instance->Vx -= 0.2;
 		break;
 	case '+':
-		instance->Obsz += 0.2;
+		instance->Obsz += instance->getObsIncrease();
 		break;
 	case '-':
-		instance->Obsz -= 0.2;
+		instance->Obsz -= instance->getObsIncrease();
+		break;
+	case 'a':
+		instance->Refx -= 20;
+		break;
+	case 'd':
+		instance->Refx += 20;
+		break;
+	case 'w':
+		instance->Refy -= 20;
+		break;
+	case 's':
+		instance->Refy += 20;
 		break;
 	}
 	if (key == 27)
@@ -71,16 +83,16 @@ void processSpecialKeys(int key, int xx, int yy) {
 	switch (key)
 	{
 	case GLUT_KEY_LEFT:
-		instance->Obsx -= 0.2;
+		instance->Obsx -= instance->getObsIncrease();
 		break;
 	case GLUT_KEY_RIGHT:
-		instance->Obsx += 0.2;
+		instance->Obsx += instance->getObsIncrease();
 		break;
 	case GLUT_KEY_UP:
-		instance->Obsy -= 0.2;
+		instance->Obsy -= instance->getObsIncrease();
 		break;
 	case GLUT_KEY_DOWN:
-		instance->Obsy += 0.2;
+		instance->Obsy += instance->getObsIncrease();
 		break;
 	}
 }
@@ -128,9 +140,11 @@ void Scene::InitializeScene() {
 
 	Model* sphere = new Model("Sfera.obj");
 	Model* cube = new Model("cube.obj");
+	Model* table = new Model("table.obj");
 
 	models.push_back(sphere);
 	models.push_back(cube);
+	models.push_back(table);
 
 	// Creare VBO+shader
 	CreateVBO();
@@ -172,8 +186,8 @@ void Scene::RenderFunction() {
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 
 	Obs = glm::vec3(Obsx, Obsy, Obsz); 
-	Refx = Obsx; Refy = Obsy;
-	PctRef = glm::vec3(Refx, Refy, 800);
+	//Refx = Obsx; Refy = Obsy;
+	PctRef = glm::vec3(Refx, Refy, Refz);
 	Vert = glm::vec3(Vx, 1.0f, 0.0f);
 	view = glm::lookAt(Obs, PctRef, Vert);
 	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, &view[0][0]);
@@ -203,6 +217,23 @@ void Scene::RenderFunction() {
 	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
 
 	/////////////////////////////////////////////////////////////////////////////////
+
+	// drawing the table
+	i++;
+	glBindVertexArray(models[i]->VAO);
+
+	// set the table's position
+	myMatrix = glm::translate(glm::vec3(-5, 100, 0));
+	myMatrix = myMatrix * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
+
+	// new texture for the table
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, GreenCircleTexture);
+	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);	// also works with the same texture index (0 instead of 1 and GL_TEXTURE0)
+
+	// draw the table
+	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
 
 	glDisable(GL_TEXTURE_2D);
 	glutSwapBuffers();
@@ -238,4 +269,8 @@ void Scene::DestroyVBO()
 	for (int i = 0; i < models.size(); i++) {
 		glDeleteBuffers(1, &models[i]->VBO);
 	}
+}
+
+float Scene::getObsIncrease() const {
+	return obsIncrease;
 }

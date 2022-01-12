@@ -1,4 +1,3 @@
-// Adaptat dupa http://www.opengl-tutorial.org/ 
 #pragma warning(disable : 4996)
 
 #include <vector>
