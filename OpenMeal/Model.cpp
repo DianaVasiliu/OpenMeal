@@ -1,5 +1,4 @@
 #include "Model.h"
-//#include "objloader.hpp"
 #include "OBJ_Loader.h"
 
 #include <iostream>
@@ -50,5 +49,4 @@ Model::Model(const char* modelName):
 		Vertices.push_back(uvs[i].x);
 		Vertices.push_back(uvs[i].y);
 	}
-
 }

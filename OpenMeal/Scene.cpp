@@ -62,16 +62,16 @@ void processNormalKeys(unsigned char key, int x, int y) {
 		instance->Obsz -= instance->getObsIncrease();
 		break;
 	case 'a':
-		instance->Refx -= 20;
-		break;
-	case 'd':
 		instance->Refx += 20;
 		break;
+	case 'd':
+		instance->Refx -= 20;
+		break;
 	case 'w':
-		instance->Refy -= 20;
+		instance->Refy += 20;
 		break;
 	case 's':
-		instance->Refy += 20;
+		instance->Refy -= 20;
 		break;
 	}
 	if (key == 27)
@@ -83,16 +83,16 @@ void processSpecialKeys(int key, int xx, int yy) {
 	switch (key)
 	{
 	case GLUT_KEY_LEFT:
-		instance->Obsx -= instance->getObsIncrease();
-		break;
-	case GLUT_KEY_RIGHT:
 		instance->Obsx += instance->getObsIncrease();
 		break;
+	case GLUT_KEY_RIGHT:
+		instance->Obsx -= instance->getObsIncrease();
+		break;
 	case GLUT_KEY_UP:
-		instance->Obsy -= instance->getObsIncrease();
+		instance->Obsy += instance->getObsIncrease();
 		break;
 	case GLUT_KEY_DOWN:
-		instance->Obsy += instance->getObsIncrease();
+		instance->Obsy -= instance->getObsIncrease();
 		break;
 	}
 }
@@ -138,25 +138,25 @@ void Scene::InitializeLibraries() {
 void Scene::InitializeScene() {
 	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
 
-	//Model* sphere = new Model("Sfera.obj");
-	//Model* cube = new Model("cube.obj");
-	Model* table = new Model("table.obj");
+	Model* table = new Model("table1.obj");
+	Model* burger = new Model("burger1.obj");
+	Model* plate = new Model("plate1.obj");
 	Model* book = new Model("book3.obj");
 	Model* cup = new Model("cup2.obj");
 
-	//models.push_back(sphere);
-	//models.push_back(cube);
 	models.push_back(table);
+	models.push_back(burger);
 	models.push_back(book);
 	models.push_back(cup);
+	models.push_back(plate);
 
 	// Creare VBO+shader
 	CreateVBO();
 	CreateShaders("tex.vert", "tex.frag");
 
-	LoadTexture(GreenCircleTexture, "green_circle.png");
 	LoadTexture(LavaTexture, "lava.png");
 	LoadTexture(WoodTexture, "wood.png");
+	LoadTexture(PlainTexture, "plain.png");
 	LoadTexture(BookTexture, "mockingbird.png");
 	LoadTexture(CupTexture, "marble.png");
 
@@ -181,41 +181,65 @@ void Scene::RenderFunction() {
 
 	Obs = glm::vec3(Obsx, Obsy, Obsz);
 	PctRef = glm::vec3(Refx, Refy, Refz);
-	Vert = glm::vec3(Vx, 1.0f, 0.0f);
+	Vert = glm::vec3(Vx, Vy, Vz);
 	view = glm::lookAt(Obs, PctRef, Vert);
 	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, &view[0][0]);
 
 	projection = glm::perspective(fov, GLfloat(width) / GLfloat(height), znear, zfar);
 	glUniformMatrix4fv(projLocation, 1, GL_FALSE, &projection[0][0]);
 
-	// drawing the table
+	////////////////////////////////////////
+	// /////////// TABLE
+	////////////////////////////////////////
 	int i = 0;
 	glBindVertexArray(models[i]->VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, models[i]->VAO);
 
-	// set the table's position
-	myMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	// set the object's position
+	myMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(-40.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	myMatrix *= glm::scale(glm::mat4(1.0f), glm::vec3(1 / 1.5f, 1 / 1.5f, 1 / 1.5f));
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 
-	// new texture for the table
+	// new texture for the object
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, WoodTexture);
 	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);
 
-	// draw the table
+	// draw the object
+	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
+
+	////////////////////////////////////////////////////////////////////////////////////////
+
+	////////////////////////////////////////
+	// /////////// BURGER
+	////////////////////////////////////////
+	i++;
+	glBindVertexArray(models[i]->VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, models[i]->VAO);
+
+	// set the object's position
+	myMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-2.8f, 5.5f, -2.5f));
+	myMatrix *= glm::scale(glm::mat4(1.0f), glm::vec3(50.0f, 50.0f, 50.0f));
+	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
+
+	// new texture for the object
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, LavaTexture);
+	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);
+
+	// draw the object
 	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
 
 
 	// drawing the book
-	i = 1;
+	i ++;
 	glBindVertexArray(models[i]->VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, models[i]->VAO);
 
 	// set the book's position
-    glm::mat4 rotateBook = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	glm::mat4 resizeBook = glm::scale(glm::mat4(1.0f), glm::vec3(0.007, 0.007, 0.007));
-	glm::mat4 translateBook = glm::translate(glm::mat4(1.0f), glm::vec3(0, -926.5, 0));
-	myMatrix = resizeBook * translateBook * rotateBook;
+	glm::mat4 translateBook = glm::translate(glm::mat4(1.0f), glm::vec3(4, 6.2, 0));
+	myMatrix =  translateBook * resizeBook;
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 
 
@@ -228,15 +252,14 @@ void Scene::RenderFunction() {
 	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
 
 	// drawing the cup
-	i = 2;
+	i ++;
 	glBindVertexArray(models[i]->VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, models[i]->VAO);
 
 	// set the cup's position
-	glm::mat4 rotateCup = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	glm::mat4 resizeCup = glm::scale(glm::mat4(1.0f), glm::vec3(0.003, 0.003, 0.003));
-	glm::mat4 translateCup = glm::translate(glm::mat4(1.0f), glm::vec3(1200, -2150, 0));
-	myMatrix = resizeCup * translateCup * rotateCup;
+	glm::mat4 resizeCup = glm::scale(glm::mat4(1.0f), glm::vec3(0.0035, 0.0035, 0.0035));
+	glm::mat4 translateCup = glm::translate(glm::mat4(1.0f), glm::vec3(-3.5,6.2, 0));
+	myMatrix = translateCup * resizeCup;
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 
 
@@ -251,6 +274,27 @@ void Scene::RenderFunction() {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////
+	
+	////////////////////////////////////////
+	// /////////// PLATE
+	////////////////////////////////////////
+	i++;
+	glBindVertexArray(models[i]->VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, models[i]->VAO);
+
+	// set the object's position
+	myMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 6.1f, 0.0f));
+	myMatrix *= glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	myMatrix *= glm::scale(glm::mat4(1.0f), glm::vec3(1 / 4.0f, 1 / 4.0f, 1 / 4.0f));
+	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
+
+	// new texture for the object
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, PlainTexture);
+	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);
+
+	// draw the object
+	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
 
 	glDisable(GL_TEXTURE_2D);
 	glutSwapBuffers();
