@@ -16,11 +16,17 @@ private:
 	Scene();
 	static Scene* instance;
 
-	float obsIncrease = 0.5f;
+	float distanceIncrease = 0.5f;
+	float betaIncrease = 0.01;
+	float firstAlphaIncrease = 0.01;
+	float secondAlphaIncrease = 0.01;
 
 public:
+	float const PI = 3.141592;
+
+	// elemente pentru matricea de vizualizare
 	float Obsx = 0.0, Obsy = 10.0, Obsz = -10;
-	float Refx = 0.0f, Refy = 0.0f, Refz = 800.0f;
+	float Refx = 0.0f, Refy = 6.0f, Refz = 0.0f;
 	float Vx = 0.0, Vy = -1.0, Vz = 0.0;
 	
 	float 
@@ -30,6 +36,8 @@ public:
 		ywmin = -200, ywmax = 200, 
 		znear = 1, zfar = -100, 
 		fov = 30;
+	float alpha = 0.0f, beta = 0.0f, distance = 10.0f;
+
 
 	glm::vec3 Obs, PctRef, Vert;
 	glm::mat4 view, projection, myMatrix;
@@ -59,7 +67,12 @@ public:
 	std::vector<Model*> models;
 
 	static Scene* getInstance();
-	float getObsIncrease() const;
+	float getDistanceIncrease() const;
+	float getBetaIncrease() const;
+	float getFirstAlphaIncrease() const;
+	float getSecondAlphaIncrease() const;
+	void setFirstAlphaIncrease(float);
+	void setSecondAlphaIncrease(float);
 
 	void InitializeLibraries();
 	void InitializeScene();
