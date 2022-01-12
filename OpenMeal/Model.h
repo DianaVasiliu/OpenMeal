@@ -3,6 +3,7 @@
 #include <vector>
 #include <GL/glew.h>
 #include <GL/freeglut.h>
+#include "OBJ_Loader.h"
 
 #include "glm/glm/glm.hpp"  
 
@@ -21,5 +22,7 @@ public:
 	int verticesCount;
 
 	std::vector<float> Vertices;
+	std::vector<objl::Mesh> Meshes;
+	std::vector<std::vector<float>> MeshVertices;
 
 };
