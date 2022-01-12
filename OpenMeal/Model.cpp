@@ -1,5 +1,4 @@
 #include "Model.h"
-//#include "objloader.hpp"
 #include "OBJ_Loader.h"
 
 #include <iostream>
