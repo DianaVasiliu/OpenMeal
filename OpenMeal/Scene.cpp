@@ -155,10 +155,10 @@ void Scene::InitializeScene() {
 	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
 
 	Model* table = new Model("table1.obj");
-	Model* burger = new Model("burger1.obj");
+	Model* burger = new Model("chicken.obj");
 	Model* plate = new Model("plate1.obj");
 	Model* book = new Model("book3.obj");
-	Model* cup = new Model("cup2.obj");
+	Model* cup = new Model("cup.obj");
 	Model* glass = new Model("glass2.obj");
 
 	models.push_back(table);
@@ -178,12 +178,28 @@ void Scene::InitializeScene() {
 	LoadTexture(BookTexture, "go-set-a-watchman2.png");
 	LoadTexture(PagesTexture, "page.png");
 	LoadTexture(CupTexture, "blueCup.png");
+	LoadTexture(MarbleTexture, "marble.png");
+	LoadTexture(ChickenTexture, "chicken.png");
+	LoadTexture(ChickenORMTexture, "chickenORM.png");
+	LoadTexture(ChickenNormalTexture, "chickenNormal.png");
 
 	// Locatii ptr shader
 	myMatrixLocation = glGetUniformLocation(ProgramId, "myMatrix");
 	viewLocation = glGetUniformLocation(ProgramId, "viewShader");
 	projLocation = glGetUniformLocation(ProgramId, "projectionShader");
+	lightColorLoc = glGetUniformLocation(ProgramId, "lightColor");
+	lightPosLoc = glGetUniformLocation(ProgramId, "lightPos");
+	viewPosLoc = glGetUniformLocation(ProgramId, "viewPos");
+	shadowMatrixLocation = glGetUniformLocation(ProgramId, "shadowMatrix");
 
+	// shadow matrix
+	float D = 0.4f;
+	shadowMatrix = glm::make_mat4(new float[16]{
+		lightPosition.z + D, 0, 0, 0,
+		0, lightPosition.z + D, 0, 0,
+		-lightPosition.x, -lightPosition.y, D, -1,
+		-D * lightPosition.x, -D * lightPosition.y, -D * lightPosition.z, lightPosition.z
+	});
 }
 
 void Scene::CreateShaders(const char* vertShader, const char* fragShader) {
@@ -209,6 +225,10 @@ void Scene::RenderFunction() {
 	view = glm::lookAt(Obs, PctRef, Vert);
 	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, &view[0][0]);
 
+	glUniform3f(lightColorLoc, lightColor.x, lightColor.y, lightColor.z);
+	glUniform3f(lightPosLoc, lightPosition.x, lightPosition.y, lightPosition.z);
+	glUniform3f(viewPosLoc, Obsx, Obsy, Obsz);
+
 	projection = glm::perspective(fov, GLfloat(width) / GLfloat(height), znear, zfar);
 	glUniformMatrix4fv(projLocation, 1, GL_FALSE, &projection[0][0]);
 
@@ -224,6 +244,10 @@ void Scene::RenderFunction() {
 	myMatrix *= glm::scale(glm::mat4(1.0f), glm::vec3(1 / 1.5f, 1 / 1.5f, 1 / 1.5f));
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 
+
+	glUniformMatrix4fv(shadowMatrixLocation, 1, GL_FALSE, &glm::mat4(1.0f)[0][0]);
+
+
 	// new texture for the object
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, WoodTexture);
@@ -235,46 +259,71 @@ void Scene::RenderFunction() {
 	////////////////////////////////////////////////////////////////////////////////////////
 
 	////////////////////////////////////////
-	// /////////// BURGER
+	// /////////// CHICKEN
 	////////////////////////////////////////
 	i++;
 	glBindVertexArray(models[i]->VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, models[i]->VAO);
 
 	// set the object's position
-	myMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-2.8f, 5.5f, -2.5f));
-	myMatrix *= glm::scale(glm::mat4(1.0f), glm::vec3(50.0f, 50.0f, 50.0f));
+	myMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 6.6f, 0.0f));
+	myMatrix *= glm::scale(glm::mat4(1.0f), glm::vec3(1 / 30.0f, 1 / 30.0f, 1 / 30.0f));
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
+
+	
+	glUniformMatrix4fv(shadowMatrixLocation, 1, GL_FALSE, &glm::mat4(1.0f)[0][0]);
+
 
 	// new texture for the object
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, LavaTexture);
+	glBindTexture(GL_TEXTURE_2D, ChickenTexture);
+	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, ChickenORMTexture);
+	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, ChickenNormalTexture);
 	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);
 
 	// draw the object
+	//std::cout << models[i]->MeshVertices.size();
+
+	int n = 0;
+	int m = 1;
+	for (int j = 0; j < m; j++) {
+		n += models[i]->MeshVertices[j].size();
+	}
+
 	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
 
+	////////////////////////////////////////////////////////////////////////////////////////
 
-	// drawing the book
+	////////////////////////////////////////
+	// /////////// BOOK
+	////////////////////////////////////////
 	i ++;
 	glBindVertexArray(models[i]->VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, models[i]->VAO);
 
-	// set the book's position
+	// set the object's position
 	glm::mat4 resizeBook = glm::scale(glm::mat4(1.0f), glm::vec3(0.007, 0.007, 0.007));
 	glm::mat4 translateBook = glm::translate(glm::mat4(1.0f), glm::vec3(4, 6.2, 0));
 	myMatrix =  translateBook * resizeBook;
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 
 
-	// new texture for the book
+	glUniformMatrix4fv(shadowMatrixLocation, 1, GL_FALSE, &glm::mat4(1.0f)[0][0]);
+
+
+	// new texture for the object
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, PagesTexture);
 	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);
-	
 
-	int coverMeshSize = models[i]->MeshVertices[2].size() / 5;
-	int totalVerticesSize = models[i]->Vertices.size() / 5;
+	int coverMeshSize = models[i]->MeshVertices[2].size() / 8;
+	int totalVerticesSize = models[i]->Vertices.size() / 8;
 	//draw the book pages
 	glDrawArrays(GL_TRIANGLES, 0, totalVerticesSize - coverMeshSize);
 
@@ -286,40 +335,62 @@ void Scene::RenderFunction() {
 	// draw the book cover
 	glDrawArrays(GL_TRIANGLES, totalVerticesSize - coverMeshSize, coverMeshSize);
 
-	// drawing the cup
-	i++;
+	////////////////////////////////////////////////////////////////////////////////////////
+
+	////////////////////////////////////////
+	// /////////// CUP
+	////////////////////////////////////////
+	i ++;
 	glBindVertexArray(models[i]->VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, models[i]->VAO);
-	// set the cup's position
-	glm::mat4 resizeCup = glm::scale(glm::mat4(1.0f), glm::vec3(0.0035, 0.0035, 0.0035));
-	glm::mat4 translateCup = glm::translate(glm::mat4(1.0f), glm::vec3(-3.5, 6.2, 0));
+
+	// set the object's position
+	glm::mat4 resizeCup = glm::scale(glm::mat4(1.0f), glm::vec3(0.3, 0.3, 0.3));
+	glm::mat4 translateCup = glm::translate(glm::mat4(1.0f), glm::vec3(-4.0, 6.5, -1.0));
 	myMatrix = translateCup * resizeCup;
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 
-	// new texture for the cup
+
+	glUniformMatrix4fv(shadowMatrixLocation, 1, GL_FALSE, &glm::mat4(1.0f)[0][0]);
+
+
+	// new texture for the object
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, CupTexture);
+	glBindTexture(GL_TEXTURE_2D, MarbleTexture);
 	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);
-	
-	//draw the cup
+
+	// draw the object
 	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
 
-	// drawing the glass
+
+	//glUniformMatrix4fv(shadowMatrixLocation, 1, GL_FALSE, &shadowMatrix[0][0]);
+	//glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
+
+	////////////////////////////////////////////////////////////////////////////////////////
+
+	////////////////////////////////////////
+	// /////////// GLASS
+	////////////////////////////////////////
 	i ++;
 	glBindVertexArray(models[i]->VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, models[i]->VAO);
 	glBindTexture(GL_TEXTURE_2D, 0);
+
 	// set the glass's position
 	glm::mat4 resizeGlass = glm::scale(glm::mat4(1.0f), glm::vec3(0.25, 0.25, 0.25));
 	glm::mat4 translateGlass = glm::translate(glm::mat4(1.0f), glm::vec3(-4,6.2, -1.5));
 	myMatrix = translateGlass * resizeGlass;
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 
+	glUniformMatrix4fv(shadowMatrixLocation, 1, GL_FALSE, &glm::mat4(1.0f)[0][0]);
+
+	// new texture for the object
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, CupTexture);
+	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);
 
 	//draw the glass
 	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
-
-
 
 	////////////////////////////////////////////////////////////////////////////////////////
 	
@@ -336,9 +407,13 @@ void Scene::RenderFunction() {
 	myMatrix *= glm::scale(glm::mat4(1.0f), glm::vec3(1 / 4.0f, 1 / 4.0f, 1 / 4.0f));
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 
+
+	glUniformMatrix4fv(shadowMatrixLocation, 1, GL_FALSE, &glm::mat4(1.0f)[0][0]);
+
+
 	// new texture for the object
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, PlainTexture);
+	glBindTexture(GL_TEXTURE_2D, MarbleTexture);
 	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);
 
 	// draw the object
@@ -359,9 +434,11 @@ void Scene::CreateVBO() {
 		glBufferData(GL_ARRAY_BUFFER, models[i]->Vertices.size() * sizeof(float), &models[i]->Vertices[0], GL_STATIC_DRAW);
 
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
 		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (const GLvoid*)(3 * sizeof(float)));
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (const GLvoid*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (const GLvoid*)(5 * sizeof(float)));
 	}
 }
 
