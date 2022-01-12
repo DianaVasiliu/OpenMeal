@@ -301,8 +301,8 @@ void Scene::RenderFunction() {
 	glBindTexture(GL_TEXTURE_2D, PagesTexture);
 	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);
 
-	int coverMeshSize = models[i]->MeshVertices[2].size() / 5;
-	int totalVerticesSize = models[i]->Vertices.size() / 5;
+	int coverMeshSize = models[i]->MeshVertices[2].size() / 8;
+	int totalVerticesSize = models[i]->Vertices.size() / 8;
 	//draw the book pages
 	glDrawArrays(GL_TRIANGLES, 0, totalVerticesSize - coverMeshSize);
 
