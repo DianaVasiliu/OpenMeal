@@ -98,12 +98,22 @@ bool loadOBJ(
 		glm::vec2 uv = temp_uvs[uvIndex - 1];
 		glm::vec3 normal = temp_normals[normalIndex - 1];
 
+		/*out_vertices.push_back(vertex.x);
+		out_vertices.push_back(vertex.y);
+		out_vertices.push_back(vertex.z);
+		out_vertices.push_back(uv.x);
+		out_vertices.push_back(uv.y);
+		out_vertices.push_back(normal.x);
+		out_vertices.push_back(normal.y);
+		out_vertices.push_back(normal.z);*/
+
 		// Put the attributes in buffers
 		out_vertices.push_back(vertex);
 		out_uvs.push_back(uv);
 		out_normals.push_back(normal);
 
 	}
+
 	fclose(file);
 	return true;
 }
