@@ -1,7 +1,6 @@
 #include "Scene.h"
 #include "Model.h"
 #include "loadShaders.h"
-#include "objloader.hpp"
 
 #include <iostream>
 
@@ -33,6 +32,7 @@ void LoadTexture(GLuint& texture, const char* imageName)
 	else
 	{
 		std::cout << "Failed to load texture" << std::endl;
+		std::cout << SOIL_last_result() << "\n";
 	}
 
 	SOIL_free_image_data(image);
@@ -138,12 +138,12 @@ void Scene::InitializeLibraries() {
 void Scene::InitializeScene() {
 	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
 
-	Model* sphere = new Model("Sfera.obj");
-	Model* cube = new Model("cube.obj");
+	//Model* sphere = new Model("Sfera.obj");
+	//Model* cube = new Model("cube.obj");
 	Model* table = new Model("table.obj");
 
-	models.push_back(sphere);
-	models.push_back(cube);
+	//models.push_back(sphere);
+	//models.push_back(cube);
 	models.push_back(table);
 
 	// Creare VBO+shader
@@ -152,6 +152,7 @@ void Scene::InitializeScene() {
 
 	LoadTexture(GreenCircleTexture, "green_circle.png");
 	LoadTexture(LavaTexture, "lava.png");
+	LoadTexture(WoodTexture, "wood.png");
 
 	// Locatii ptr shader
 	myMatrixLocation = glGetUniformLocation(ProgramId, "myMatrix");
@@ -172,21 +173,7 @@ void Scene::RenderFunction() {
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_TEXTURE_2D);
 
-	// drawing the first object (the sphere)
-	int i = 0;
-	glBindVertexArray(models[i]->VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, models[i]->VAO);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, GreenCircleTexture);
-	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);
-
-	// set the sphere's position
-	myMatrix = glm::mat4(1.0f);
-	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
-
-	Obs = glm::vec3(Obsx, Obsy, Obsz); 
-	//Refx = Obsx; Refy = Obsy;
+	Obs = glm::vec3(Obsx, Obsy, Obsz);
 	PctRef = glm::vec3(Refx, Refy, Refz);
 	Vert = glm::vec3(Vx, 1.0f, 0.0f);
 	view = glm::lookAt(Obs, PctRef, Vert);
@@ -195,45 +182,24 @@ void Scene::RenderFunction() {
 	projection = glm::perspective(fov, GLfloat(width) / GLfloat(height), znear, zfar);
 	glUniformMatrix4fv(projLocation, 1, GL_FALSE, &projection[0][0]);
 
-	// draw the sphere
-	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	// drawing the second object (the cube)
-	i++;
-	glBindVertexArray(models[i]->VAO);
-
-	// set the cube's position
-	myMatrix = glm::translate(glm::vec3(-5, 0, 0));
-	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
-
-	// new texture for the cube
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, LavaTexture);
-	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 1);	// also works with the same texture index (0 instead of 1 and GL_TEXTURE0)
-
-	// draw the cube
-	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
-
-	/////////////////////////////////////////////////////////////////////////////////
-
 	// drawing the table
-	i++;
+	int i = 0;
 	glBindVertexArray(models[i]->VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, models[i]->VAO);
 
 	// set the table's position
-	myMatrix = glm::translate(glm::vec3(-5, 100, 0));
-	myMatrix = myMatrix * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	myMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 
 	// new texture for the table
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, GreenCircleTexture);
-	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);	// also works with the same texture index (0 instead of 1 and GL_TEXTURE0)
+	glBindTexture(GL_TEXTURE_2D, WoodTexture);
+	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);
 
 	// draw the table
 	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
+
+	////////////////////////////////////////////////////////////////////////////////////////
 
 	glDisable(GL_TEXTURE_2D);
 	glutSwapBuffers();
