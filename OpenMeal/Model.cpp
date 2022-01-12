@@ -47,6 +47,9 @@ Model::Model(const char* modelName):
 		Vertices.push_back(vertices[i].z);
 		Vertices.push_back(uvs[i].x);
 		Vertices.push_back(uvs[i].y);
+		Vertices.push_back(normals[i].x);
+		Vertices.push_back(normals[i].y);
+		Vertices.push_back(normals[i].z);
 	}
 
 	for (int i = 0; i < loader->LoadedMeshes.size(); i++) {
@@ -58,8 +61,9 @@ Model::Model(const char* modelName):
 			MeshVertices[i].push_back(vertices[i].z);
 			MeshVertices[i].push_back(uvs[i].x);
 			MeshVertices[i].push_back(uvs[i].y);
+			MeshVertices[i].push_back(normals[i].x);
+			MeshVertices[i].push_back(normals[i].y);
+			MeshVertices[i].push_back(normals[i].z);
 		}
 	}
-
-
 }
