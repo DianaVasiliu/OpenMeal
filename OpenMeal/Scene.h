@@ -37,6 +37,8 @@ public:
 		GreenCircleTexture,
 		LavaTexture,
 		WoodTexture,
+		BookTexture,
+		CupTexture,
 		ProgramId,
 		viewLocation,
 		projLocation,

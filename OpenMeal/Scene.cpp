@@ -141,10 +141,14 @@ void Scene::InitializeScene() {
 	//Model* sphere = new Model("Sfera.obj");
 	//Model* cube = new Model("cube.obj");
 	Model* table = new Model("table.obj");
+	Model* book = new Model("book3.obj");
+	Model* cup = new Model("cup2.obj");
 
 	//models.push_back(sphere);
 	//models.push_back(cube);
 	models.push_back(table);
+	models.push_back(book);
+	models.push_back(cup);
 
 	// Creare VBO+shader
 	CreateVBO();
@@ -153,6 +157,8 @@ void Scene::InitializeScene() {
 	LoadTexture(GreenCircleTexture, "green_circle.png");
 	LoadTexture(LavaTexture, "lava.png");
 	LoadTexture(WoodTexture, "wood.png");
+	LoadTexture(BookTexture, "mockingbird.png");
+	LoadTexture(CupTexture, "marble.png");
 
 	// Locatii ptr shader
 	myMatrixLocation = glGetUniformLocation(ProgramId, "myMatrix");
@@ -198,6 +204,51 @@ void Scene::RenderFunction() {
 
 	// draw the table
 	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
+
+
+	// drawing the book
+	i = 1;
+	glBindVertexArray(models[i]->VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, models[i]->VAO);
+
+	// set the book's position
+    glm::mat4 rotateBook = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	glm::mat4 resizeBook = glm::scale(glm::mat4(1.0f), glm::vec3(0.007, 0.007, 0.007));
+	glm::mat4 translateBook = glm::translate(glm::mat4(1.0f), glm::vec3(0, -926.5, 0));
+	myMatrix = resizeBook * translateBook * rotateBook;
+	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
+
+
+	// new texture for the book
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, BookTexture);
+	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);
+	
+	//draw the book
+	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
+
+	// drawing the cup
+	i = 2;
+	glBindVertexArray(models[i]->VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, models[i]->VAO);
+
+	// set the cup's position
+	glm::mat4 rotateCup = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	glm::mat4 resizeCup = glm::scale(glm::mat4(1.0f), glm::vec3(0.003, 0.003, 0.003));
+	glm::mat4 translateCup = glm::translate(glm::mat4(1.0f), glm::vec3(1200, -2150, 0));
+	myMatrix = resizeCup * translateCup * rotateCup;
+	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
+
+
+	// new texture for the cup
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, CupTexture);
+	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);
+
+	//draw the cup
+	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
+
+
 
 	////////////////////////////////////////////////////////////////////////////////////////
 
