@@ -50,5 +50,4 @@ Model::Model(const char* modelName):
 		Vertices.push_back(uvs[i].x);
 		Vertices.push_back(uvs[i].y);
 	}
-
 }
