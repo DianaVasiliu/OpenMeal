@@ -1,5 +1,4 @@
 #include "Model.h"
-#include "OBJ_Loader.h"
 
 #include <iostream>
 
@@ -49,6 +48,18 @@ Model::Model(const char* modelName):
 		Vertices.push_back(vertices[i].z);
 		Vertices.push_back(uvs[i].x);
 		Vertices.push_back(uvs[i].y);
+	}
+
+	for (int i = 0; i < loader->LoadedMeshes.size(); i++) {
+		std::vector<float> x;
+		MeshVertices.push_back(x);
+		for (int j = 0; j < loader->LoadedMeshes[i].Vertices.size(); j++) {
+			MeshVertices[i].push_back(vertices[i].x);
+			MeshVertices[i].push_back(vertices[i].y);
+			MeshVertices[i].push_back(vertices[i].z);
+			MeshVertices[i].push_back(uvs[i].x);
+			MeshVertices[i].push_back(uvs[i].y);
+		}
 	}
 
 }

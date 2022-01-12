@@ -219,7 +219,7 @@ void Scene::RenderFunction() {
 	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);
 
 	// draw the table
-	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
+	glDrawArrays(GL_TRIANGLES, 0, models[i]->Vertices.size());
 
 	////////////////////////////////////////////////////////////////////////////////////////
 
