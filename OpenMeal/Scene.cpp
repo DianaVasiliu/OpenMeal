@@ -143,11 +143,13 @@ void Scene::InitializeScene() {
 	Model* plate = new Model("plate1.obj");
 	Model* book = new Model("book3.obj");
 	Model* cup = new Model("cup2.obj");
+	Model* glass = new Model("glass2.obj");
 
 	models.push_back(table);
 	models.push_back(burger);
 	models.push_back(book);
 	models.push_back(cup);
+	models.push_back(glass);
 	models.push_back(plate);
 
 	// Creare VBO+shader
@@ -271,7 +273,7 @@ void Scene::RenderFunction() {
 
 	// set the object's position
 	glm::mat4 resizeCup = glm::scale(glm::mat4(1.0f), glm::vec3(0.0035, 0.0035, 0.0035));
-	glm::mat4 translateCup = glm::translate(glm::mat4(1.0f), glm::vec3(-3.5,6.2, 0));
+	glm::mat4 translateCup = glm::translate(glm::mat4(1.0f), glm::vec3(-3.5, 6.2, 0));
 	myMatrix = translateCup * resizeCup;
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 
@@ -282,6 +284,23 @@ void Scene::RenderFunction() {
 
 	// draw the object
 	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
+
+	// drawing the glass
+	i ++;
+	glBindVertexArray(models[i]->VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, models[i]->VAO);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	// set the glass's position
+	glm::mat4 resizeGlass = glm::scale(glm::mat4(1.0f), glm::vec3(0.25, 0.25, 0.25));
+	glm::mat4 translateGlass = glm::translate(glm::mat4(1.0f), glm::vec3(-4,6.2, -1.5));
+	myMatrix = translateGlass * resizeGlass;
+	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
+
+
+	//draw the glass
+	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
+
+
 
 	////////////////////////////////////////////////////////////////////////////////////////
 	
