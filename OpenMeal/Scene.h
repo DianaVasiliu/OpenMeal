@@ -20,7 +20,7 @@ private:
 
 public:
 	// elemente pentru matricea de vizualizare
-	float Obsx = 0.0, Obsy = 0.0, Obsz = -25;
+	float Obsx = 0.0, Obsy = -10.0, Obsz = -10;
 	float Refx = 0.0f, Refy = 0.0f, Refz = 800.0f;
 	float Vx = 0.0;
 	
@@ -36,6 +36,7 @@ public:
 	GLuint
 		GreenCircleTexture,
 		LavaTexture,
+		WoodTexture,
 		ProgramId,
 		viewLocation,
 		projLocation,
