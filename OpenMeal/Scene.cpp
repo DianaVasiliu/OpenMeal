@@ -158,7 +158,7 @@ void Scene::InitializeScene() {
 	LoadTexture(WoodTexture, "wood.png");
 	LoadTexture(PlainTexture, "plain.png");
 	LoadTexture(BookTexture, "mockingbird.png");
-	LoadTexture(CupTexture, "marble.png");
+	LoadTexture(CupTexture, "blueCup.png");
 
 	// Locatii ptr shader
 	myMatrixLocation = glGetUniformLocation(ProgramId, "myMatrix");
