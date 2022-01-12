@@ -39,6 +39,7 @@ public:
 		PlainTexture,
 		BookTexture,
 		CupTexture,
+		PagesTexture,
 		ProgramId,
 		viewLocation,
 		projLocation,

@@ -159,7 +159,8 @@ void Scene::InitializeScene() {
 	LoadTexture(LavaTexture, "lava.png");
 	LoadTexture(WoodTexture, "wood.png");
 	LoadTexture(PlainTexture, "plain.png");
-	LoadTexture(BookTexture, "mockingbird.png");
+	LoadTexture(BookTexture, "go-set-a-watchman2.png");
+	LoadTexture(PagesTexture, "page.png");
 	LoadTexture(CupTexture, "blueCup.png");
 
 	// Locatii ptr shader
@@ -247,11 +248,22 @@ void Scene::RenderFunction() {
 
 	// new texture for the book
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, BookTexture);
+	glBindTexture(GL_TEXTURE_2D, PagesTexture);
 	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);
 	
-	//draw the book
-	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
+
+	int coverMeshSize = models[i]->MeshVertices[2].size() / 5;
+	int totalVerticesSize = models[i]->Vertices.size() / 5;
+	//draw the book pages
+	glDrawArrays(GL_TRIANGLES, 0, totalVerticesSize - coverMeshSize);
+
+	// new texture for the book cover
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, BookTexture);
+	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);
+
+	// draw the book cover
+	glDrawArrays(GL_TRIANGLES, totalVerticesSize - coverMeshSize, coverMeshSize);
 
 	// drawing the cup
 	i++;
