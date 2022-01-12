@@ -16,10 +16,12 @@ private:
 	Scene();
 	static Scene* instance;
 
+	float obsIncrease = 0.5f;
+
 public:
 	// elemente pentru matricea de vizualizare
 	float Obsx = 0.0, Obsy = 0.0, Obsz = -25;
-	float Refx = 0.0f, Refy = 0.0f;
+	float Refx = 0.0f, Refy = 0.0f, Refz = 800.0f;
 	float Vx = 0.0;
 	
 	// elemente pentru matricea de proiectie
@@ -42,6 +44,7 @@ public:
 	std::vector<Model*> models;
 
 	static Scene* getInstance();
+	float getObsIncrease() const;
 
 	void InitializeLibraries();
 	void InitializeScene();
