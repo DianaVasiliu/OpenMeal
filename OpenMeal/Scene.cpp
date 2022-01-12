@@ -56,10 +56,10 @@ void processNormalKeys(unsigned char key, int x, int y) {
 		instance->Vx -= 0.2;
 		break;
 	case '+':
-		instance->Obsz += instance->getObsIncrease();
+		instance->distance += instance->getDistanceIncrease();
 		break;
 	case '-':
-		instance->Obsz -= instance->getObsIncrease();
+		instance->distance -= instance->getDistanceIncrease();
 		break;
 	case 'a':
 		instance->Refx += 20;
@@ -83,16 +83,32 @@ void processSpecialKeys(int key, int xx, int yy) {
 	switch (key)
 	{
 	case GLUT_KEY_LEFT:
-		instance->Obsx += instance->getObsIncrease();
+		instance->beta -= instance->getBetaIncrease();
 		break;
 	case GLUT_KEY_RIGHT:
-		instance->Obsx -= instance->getObsIncrease();
+		instance->beta += instance->getBetaIncrease();
 		break;
 	case GLUT_KEY_UP:
-		instance->Obsy += instance->getObsIncrease();
+		instance->alpha += instance->getFirstAlphaIncrease();
+		if (abs(instance->alpha - instance->PI / 2) < 0.05)
+		{
+			instance->setFirstAlphaIncrease(0.0);
+		}
+		else
+		{
+			instance->setFirstAlphaIncrease(0.1);
+		}
 		break;
 	case GLUT_KEY_DOWN:
-		instance->Obsy -= instance->getObsIncrease();
+		instance->alpha -= instance->getSecondAlphaIncrease();
+		if (abs(instance->alpha - instance->PI / 2) < 0.05)
+		{
+			instance->setSecondAlphaIncrease(0.0);
+		}
+		else
+		{
+			instance->setSecondAlphaIncrease(0.1);
+		}
 		break;
 	}
 }
@@ -182,6 +198,11 @@ void Scene::RenderFunction() {
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_TEXTURE_2D);
 
+	//pozitia observatorului
+	Obsx = Refx + distance * cos(alpha) * cos(beta);
+	Obsy = Refy + distance * sin(alpha);
+	Obsz = Refz + distance * cos(alpha) * sin(beta);
+	
 	Obs = glm::vec3(Obsx, Obsy, Obsz);
 	PctRef = glm::vec3(Refx, Refy, Refz);
 	Vert = glm::vec3(Vx, Vy, Vz);
@@ -359,6 +380,21 @@ void Scene::DestroyVBO()
 	}
 }
 
-float Scene::getObsIncrease() const {
-	return obsIncrease;
+float Scene::getDistanceIncrease() const {
+	return distanceIncrease;
+}
+float Scene::getFirstAlphaIncrease() const {
+	return firstAlphaIncrease;
+}
+float Scene::getSecondAlphaIncrease() const {
+	return secondAlphaIncrease;
+}
+float Scene::getBetaIncrease() const {
+	return betaIncrease;
+}
+void Scene::setFirstAlphaIncrease(float value) {
+	this->firstAlphaIncrease = value;
+}
+void Scene::setSecondAlphaIncrease(float value) {
+	this->secondAlphaIncrease = value;
 }
