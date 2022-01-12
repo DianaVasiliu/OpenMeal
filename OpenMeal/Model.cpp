@@ -11,6 +11,8 @@ Model::Model(const char* modelName):
 	std::vector<glm::vec2> uvs;
 	std::vector<glm::vec3> normals;
 
+	std::cout << "Loading model " << modelName << "...\n";
+
 	objl::Loader* loader = new objl::Loader();
 	bool res = loader->LoadFile(modelName);
 
