@@ -39,5 +39,5 @@ void main(void)
     vec3 emission = vec3(0.0, 0.0, 0.0);
 
     vec3 result = emission + (ambient_term + diffuse_term + specular_term);
-	out_Color = vec4(result, 1.0f);
+	out_Color = vec4(result, 0.5f);
 }

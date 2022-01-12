@@ -1,8 +1,17 @@
 Table model:
 https://sketchfab.com/3d-models/mahogany-table-e9ef3eadee9d4491b7c59fdbb19c30cd
 
+Cup model:
+https://www.cgtrader.com/free-3d-models/food/beverage/coffee-cup-f1b04892-0d0f-4a9d-bde2-bc4582afc3e0
+
+Plate model:
+https://www.cgtrader.com/free-3d-models/furniture/other/plate-includes-2-objects
+
 Glass model:
 https://www.cgtrader.com/free-3d-models/food/beverage/water-glass-e831e71f-a901-4515-b189-0c512549aae3
+
+Glass model 2:
+https://www.cgtrader.com/free-3d-models/furniture/tableware/empty-glass-01
 
 Book model:
 https://www.cgtrader.com/free-3d-models/sports/book/magazine-casa-cor

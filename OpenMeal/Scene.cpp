@@ -62,16 +62,16 @@ void processNormalKeys(unsigned char key, int x, int y) {
 		instance->distance -= instance->getDistanceIncrease();
 		break;
 	case 'a':
-		instance->Refx += 20;
+		instance->Refx += 1;
 		break;
 	case 'd':
-		instance->Refx -= 20;
+		instance->Refx -= 1;
 		break;
 	case 'w':
-		instance->Refy += 20;
+		instance->Refy += 1;
 		break;
 	case 's':
-		instance->Refy -= 20;
+		instance->Refy -= 1;
 		break;
 	}
 	if (key == 27)
@@ -155,20 +155,19 @@ void Scene::InitializeScene() {
 	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
 
 	Model* table = new Model("table1.obj");
-	Model* burger = new Model("chicken.obj");
+	Model* chicken = new Model("chicken.obj");
 	Model* plate = new Model("plate1.obj");
 	Model* book = new Model("book3.obj");
 	Model* cup = new Model("cup.obj");
-	Model* glass = new Model("glass2.obj");
+	Model* glass = new Model("glass.obj");
 
 	models.push_back(table);
-	models.push_back(burger);
+	models.push_back(chicken);
 	models.push_back(book);
 	models.push_back(cup);
 	models.push_back(glass);
 	models.push_back(plate);
 
-	// Creare VBO+shader
 	CreateVBO();
 	CreateShaders("tex.vert", "tex.frag");
 
@@ -183,7 +182,6 @@ void Scene::InitializeScene() {
 	LoadTexture(ChickenORMTexture, "chickenORM.png");
 	LoadTexture(ChickenNormalTexture, "chickenNormal.png");
 
-	// Locatii ptr shader
 	myMatrixLocation = glGetUniformLocation(ProgramId, "myMatrix");
 	viewLocation = glGetUniformLocation(ProgramId, "viewShader");
 	projLocation = glGetUniformLocation(ProgramId, "projectionShader");
@@ -214,7 +212,6 @@ void Scene::RenderFunction() {
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_TEXTURE_2D);
 
-	//pozitia observatorului
 	Obsx = Refx + distance * cos(alpha) * cos(beta);
 	Obsy = Refy + distance * sin(alpha);
 	Obsz = Refz + distance * cos(alpha) * sin(beta);
@@ -279,23 +276,7 @@ void Scene::RenderFunction() {
 	glBindTexture(GL_TEXTURE_2D, ChickenTexture);
 	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);
 
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, ChickenORMTexture);
-	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);
-
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, ChickenNormalTexture);
-	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);
-
 	// draw the object
-	//std::cout << models[i]->MeshVertices.size();
-
-	int n = 0;
-	int m = 1;
-	for (int j = 0; j < m; j++) {
-		n += models[i]->MeshVertices[j].size();
-	}
-
 	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
 
 	////////////////////////////////////////////////////////////////////////////////////////
@@ -324,6 +305,7 @@ void Scene::RenderFunction() {
 
 	int coverMeshSize = models[i]->MeshVertices[2].size() / 8;
 	int totalVerticesSize = models[i]->Vertices.size() / 8;
+
 	//draw the book pages
 	glDrawArrays(GL_TRIANGLES, 0, totalVerticesSize - coverMeshSize);
 
@@ -377,8 +359,8 @@ void Scene::RenderFunction() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	// set the glass's position
-	glm::mat4 resizeGlass = glm::scale(glm::mat4(1.0f), glm::vec3(0.25, 0.25, 0.25));
-	glm::mat4 translateGlass = glm::translate(glm::mat4(1.0f), glm::vec3(-4,6.2, -1.5));
+	glm::mat4 resizeGlass = glm::scale(glm::mat4(1.0f), glm::vec3(10, 10, 10));
+	glm::mat4 translateGlass = glm::translate(glm::mat4(1.0f), glm::vec3(-4, 6.2, -1.5));
 	myMatrix = translateGlass * resizeGlass;
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 
@@ -386,11 +368,16 @@ void Scene::RenderFunction() {
 
 	// new texture for the object
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, CupTexture);
+	glBindTexture(GL_TEXTURE_2D, MarbleTexture);
 	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);
 
-	//draw the glass
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_SRC_ALPHA);
+
+	// draw the glass
 	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
+
+	glDisable(GL_BLEND);
 
 	////////////////////////////////////////////////////////////////////////////////////////
 	
@@ -449,6 +436,7 @@ void Scene::DestroyShaders()
 
 void Scene::DestroyVBO()
 {
+	glDisableVertexAttribArray(2);
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
