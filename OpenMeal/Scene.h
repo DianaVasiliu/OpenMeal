@@ -20,9 +20,9 @@ private:
 
 public:
 	// elemente pentru matricea de vizualizare
-	float Obsx = 0.0, Obsy = -10.0, Obsz = -10;
+	float Obsx = 0.0, Obsy = 10.0, Obsz = -10;
 	float Refx = 0.0f, Refy = 0.0f, Refz = 800.0f;
-	float Vx = 0.0;
+	float Vx = 0.0, Vy = -1.0, Vz = 0.0;
 	
 	// elemente pentru matricea de proiectie
 	float width = 800, height = 600, xwmin = -200.f, xwmax = 200, ywmin = -200, ywmax = 200, znear = 1, zfar = -100, fov = 30;
@@ -34,9 +34,9 @@ public:
 	glm::mat4 view, projection, myMatrix;
 
 	GLuint
-		GreenCircleTexture,
 		LavaTexture,
 		WoodTexture,
+		PlainTexture,
 		ProgramId,
 		viewLocation,
 		projLocation,
