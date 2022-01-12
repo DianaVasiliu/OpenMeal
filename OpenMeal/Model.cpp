@@ -18,7 +18,6 @@ Model::Model(const char* modelName):
 		std::cout << "Could not load model: " << modelName << "\nExiting ...\n";
 		exit(0);
 	}
-
 	for (int i = 0; i < loader->LoadedVertices.size(); i++) {
 		glm::vec3 vertex = glm::vec3(
 			loader->LoadedVertices[i].Position.X,
@@ -61,5 +60,6 @@ Model::Model(const char* modelName):
 			MeshVertices[i].push_back(uvs[i].y);
 		}
 	}
+
 
 }

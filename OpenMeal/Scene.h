@@ -37,6 +37,8 @@ public:
 		LavaTexture,
 		WoodTexture,
 		PlainTexture,
+		BookTexture,
+		CupTexture,
 		ProgramId,
 		viewLocation,
 		projLocation,
