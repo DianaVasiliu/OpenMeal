@@ -33,7 +33,7 @@ void main(void)
     vec3 viewDir = normalize(inViewPos - FragPos);
     vec3 reflectDir = normalize(reflect(-lightDir, norm));
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess); 
-    vec3 specular_light = specularStrength  * lightColor;
+    vec3 specular_light = specularStrength * lightColor;
     vec3 specular_term = spec * specular_light * objectColor;
 
     vec3 emission = vec3(0.0, 0.0, 0.0);

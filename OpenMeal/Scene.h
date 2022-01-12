@@ -33,6 +33,7 @@ public:
 
 	glm::vec3 Obs, PctRef, Vert;
 	glm::mat4 view, projection, myMatrix;
+	glm::mat4 shadowMatrix;
 
 	GLuint
 		LavaTexture,
@@ -45,7 +46,8 @@ public:
 		viewLocation,
 		projLocation,
 		myMatrixLocation,
-		lightColorLoc, lightPosLoc, viewPosLoc;
+		lightColorLoc, lightPosLoc, viewPosLoc,
+		shadowMatrixLocation;
 
 	glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
 	glm::vec3 lightPosition = glm::vec3(1000.0f, 1000.0f, 1000.0f);

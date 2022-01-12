@@ -142,7 +142,7 @@ void Scene::InitializeScene() {
 	Model* burger = new Model("burger1.obj");
 	Model* plate = new Model("plate1.obj");
 	Model* book = new Model("book3.obj");
-	Model* cup = new Model("cup2.obj");
+	Model* cup = new Model("cup.obj");
 	Model* glass = new Model("glass2.obj");
 
 	models.push_back(table);
@@ -170,6 +170,16 @@ void Scene::InitializeScene() {
 	lightColorLoc = glGetUniformLocation(ProgramId, "lightColor");
 	lightPosLoc = glGetUniformLocation(ProgramId, "lightPos");
 	viewPosLoc = glGetUniformLocation(ProgramId, "viewPos");
+	shadowMatrixLocation = glGetUniformLocation(ProgramId, "shadowMatrix");
+
+	// shadow matrix
+	float D = 0.4f;
+	shadowMatrix = glm::make_mat4(new float[16]{
+		lightPosition.z + D, 0, 0, 0,
+		0, lightPosition.z + D, 0, 0,
+		-lightPosition.x, -lightPosition.y, D, -1,
+		-D * lightPosition.x, -D * lightPosition.y, -D * lightPosition.z, lightPosition.z
+	});
 }
 
 void Scene::CreateShaders(const char* vertShader, const char* fragShader) {
@@ -209,6 +219,10 @@ void Scene::RenderFunction() {
 	myMatrix *= glm::scale(glm::mat4(1.0f), glm::vec3(1 / 1.5f, 1 / 1.5f, 1 / 1.5f));
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 
+
+	glUniformMatrix4fv(shadowMatrixLocation, 1, GL_FALSE, &glm::mat4(1.0f)[0][0]);
+
+
 	// new texture for the object
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, WoodTexture);
@@ -230,6 +244,10 @@ void Scene::RenderFunction() {
 	myMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-2.8f, 5.5f, -2.5f));
 	myMatrix *= glm::scale(glm::mat4(1.0f), glm::vec3(50.0f, 50.0f, 50.0f));
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
+
+	
+	glUniformMatrix4fv(shadowMatrixLocation, 1, GL_FALSE, &glm::mat4(1.0f)[0][0]);
+
 
 	// new texture for the object
 	glActiveTexture(GL_TEXTURE0);
@@ -254,6 +272,10 @@ void Scene::RenderFunction() {
 	myMatrix =  translateBook * resizeBook;
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 
+
+	glUniformMatrix4fv(shadowMatrixLocation, 1, GL_FALSE, &glm::mat4(1.0f)[0][0]);
+
+
 	// new texture for the object
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, BookTexture);
@@ -272,35 +294,52 @@ void Scene::RenderFunction() {
 	glBindBuffer(GL_ARRAY_BUFFER, models[i]->VAO);
 
 	// set the object's position
-	glm::mat4 resizeCup = glm::scale(glm::mat4(1.0f), glm::vec3(0.0035, 0.0035, 0.0035));
-	glm::mat4 translateCup = glm::translate(glm::mat4(1.0f), glm::vec3(-3.5, 6.2, 0));
+	glm::mat4 resizeCup = glm::scale(glm::mat4(1.0f), glm::vec3(0.3, 0.3, 0.3));
+	glm::mat4 translateCup = glm::translate(glm::mat4(1.0f), glm::vec3(-4.0, 6.5, -1.0));
 	myMatrix = translateCup * resizeCup;
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 
+
+	glUniformMatrix4fv(shadowMatrixLocation, 1, GL_FALSE, &glm::mat4(1.0f)[0][0]);
+
+
 	// new texture for the object
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, CupTexture);
+	glBindTexture(GL_TEXTURE_2D, MarbleTexture);
 	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);
 
 	// draw the object
 	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
 
-	// drawing the glass
+
+	//glUniformMatrix4fv(shadowMatrixLocation, 1, GL_FALSE, &shadowMatrix[0][0]);
+	//glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
+
+	////////////////////////////////////////////////////////////////////////////////////////
+
+	////////////////////////////////////////
+	// /////////// GLASS
+	////////////////////////////////////////
 	i ++;
 	glBindVertexArray(models[i]->VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, models[i]->VAO);
 	glBindTexture(GL_TEXTURE_2D, 0);
+
 	// set the glass's position
 	glm::mat4 resizeGlass = glm::scale(glm::mat4(1.0f), glm::vec3(0.25, 0.25, 0.25));
 	glm::mat4 translateGlass = glm::translate(glm::mat4(1.0f), glm::vec3(-4,6.2, -1.5));
 	myMatrix = translateGlass * resizeGlass;
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 
+	glUniformMatrix4fv(shadowMatrixLocation, 1, GL_FALSE, &glm::mat4(1.0f)[0][0]);
+
+	// new texture for the object
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, CupTexture);
+	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);
 
 	//draw the glass
 	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
-
-
 
 	////////////////////////////////////////////////////////////////////////////////////////
 	
@@ -317,6 +356,10 @@ void Scene::RenderFunction() {
 	myMatrix *= glm::scale(glm::mat4(1.0f), glm::vec3(1 / 4.0f, 1 / 4.0f, 1 / 4.0f));
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 
+
+	glUniformMatrix4fv(shadowMatrixLocation, 1, GL_FALSE, &glm::mat4(1.0f)[0][0]);
+
+
 	// new texture for the object
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, MarbleTexture);
@@ -324,6 +367,9 @@ void Scene::RenderFunction() {
 
 	// draw the object
 	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
+
+
+
 
 	glDisable(GL_TEXTURE_2D);
 	glutSwapBuffers();
