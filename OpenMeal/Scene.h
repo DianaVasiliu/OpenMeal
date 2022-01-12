@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Model.h"
-#include "Burger.h"
 
 #include <vector>
 #include <GL/glew.h>
@@ -43,13 +42,13 @@ public:
 		ChickenTexture,
 		ChickenORMTexture,
 		ChickenNormalTexture,
+		PagesTexture,
 		ProgramId,
 		viewLocation,
 		projLocation,
 		myMatrixLocation;
 
 	std::vector<Model*> models;
-	Burger* burger;
 
 	static Scene* getInstance();
 	float getObsIncrease() const;
