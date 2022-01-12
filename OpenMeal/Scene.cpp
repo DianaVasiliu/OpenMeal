@@ -128,9 +128,11 @@ void Scene::InitializeScene() {
 
 	Model* sphere = new Model("Sfera.obj");
 	Model* cube = new Model("cube.obj");
+	Model* burger_and_cup = new Model("burger_and_cup.obj");
 
 	models.push_back(sphere);
 	models.push_back(cube);
+	models.push_back(burger_and_cup);
 
 	// Creare VBO+shader
 	CreateVBO();
