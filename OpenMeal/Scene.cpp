@@ -139,7 +139,7 @@ void Scene::InitializeScene() {
 	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
 
 	Model* table = new Model("table1.obj");
-	Model* burger = new Model("burger1.obj");
+	Model* burger = new Model("chicken.obj");
 	Model* plate = new Model("plate1.obj");
 	Model* book = new Model("book3.obj");
 	Model* cup = new Model("glass2.obj");
@@ -159,6 +159,9 @@ void Scene::InitializeScene() {
 	LoadTexture(PlainTexture, "plain.png");
 	LoadTexture(BookTexture, "mockingbird.png");
 	LoadTexture(CupTexture, "blueCup.png");
+	LoadTexture(ChickenTexture, "chicken.png");
+	LoadTexture(ChickenORMTexture, "chickenORM.png");
+	LoadTexture(ChickenNormalTexture, "chickenNormal.png");
 
 	// Locatii ptr shader
 	myMatrixLocation = glGetUniformLocation(ProgramId, "myMatrix");
@@ -211,24 +214,41 @@ void Scene::RenderFunction() {
 	////////////////////////////////////////////////////////////////////////////////////////
 
 	////////////////////////////////////////
-	// /////////// BURGER
+	// /////////// CHICKEN
 	////////////////////////////////////////
 	i++;
 	glBindVertexArray(models[i]->VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, models[i]->VAO);
 
 	// set the object's position
-	myMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-2.8f, 5.5f, -2.5f));
-	myMatrix *= glm::scale(glm::mat4(1.0f), glm::vec3(50.0f, 50.0f, 50.0f));
+	myMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 6.6f, 0.0f));
+	myMatrix *= glm::scale(glm::mat4(1.0f), glm::vec3(1 / 30.0f, 1 / 30.0f, 1 / 30.0f));
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 
 	// new texture for the object
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, LavaTexture);
+	glBindTexture(GL_TEXTURE_2D, ChickenTexture);
+	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, ChickenORMTexture);
+	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, ChickenNormalTexture);
 	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);
 
 	// draw the object
+	//std::cout << models[i]->MeshVertices.size();
+
+	int n = 0;
+	int m = 1;
+	for (int j = 0; j < m; j++) {
+		n += models[i]->MeshVertices[j].size();
+	}
+
 	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
+
 
 
 	// drawing the book
