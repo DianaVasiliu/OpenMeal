@@ -20,6 +20,7 @@ public:
 		VBO;
 
 	int verticesCount;
+	int meshCount;
 
 	std::vector<float> Vertices;
 	std::vector<std::vector<float>> MeshVertices;

@@ -66,4 +66,6 @@ Model::Model(const char* modelName):
 			MeshVertices[i].push_back(normals[i].z);
 		}
 	}
+
+	meshCount = MeshVertices.size();
 }

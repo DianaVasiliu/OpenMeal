@@ -49,6 +49,7 @@ public:
 		BookTexture2,
 		MarbleTexture,
 		ChickenTexture,
+		ClothTexture,
 		PagesTexture;
 
 	// for the shaders

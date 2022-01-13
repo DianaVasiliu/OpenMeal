@@ -22,5 +22,8 @@ https://www.cgtrader.com/free-3d-models/household/kitchenware/salt-pepper-shaker
 Cutlery model (edited):
 https://www.cgtrader.com/free-3d-models/furniture/kitchen/cutlery-spoon-fork-and-knife
 
+Table cloth model (edited):
+https://sketchfab.com/3d-models/fnaf-table-5449d541f2954577a6f3e983fb2d00a5
+
 Obj File Parser:
 https://github.com/Bly7/OBJ-Loader
