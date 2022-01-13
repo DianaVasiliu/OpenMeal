@@ -14,13 +14,12 @@ out vec3 inViewPos;
 uniform mat4 myMatrix;
 uniform mat4 viewShader;
 uniform mat4 projectionShader;
-uniform mat4 shadowMatrix;
 uniform vec3 lightPos;
 uniform vec3 viewPos;
 
 void main(void)
 {
-    mat4 transformMatrix = projectionShader * viewShader * shadowMatrix * myMatrix;
+    mat4 transformMatrix = projectionShader * viewShader * myMatrix;
 
     gl_Position = transformMatrix * vec4(in_Position, 1);
     tex_Coord = vec2(texCoord.x, texCoord.y);

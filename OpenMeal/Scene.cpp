@@ -31,7 +31,7 @@ void LoadTexture(GLuint& texture, const char* imageName)
 	}
 	else
 	{
-		std::cout << "Failed to load texture" << std::endl;
+		std::cout << "ERROR: Failed to load texture " << imageName << " - ";
 		std::cout << SOIL_last_result() << "\n";
 	}
 
@@ -83,10 +83,10 @@ void processSpecialKeys(int key, int xx, int yy) {
 	switch (key)
 	{
 	case GLUT_KEY_LEFT:
-		instance->beta -= instance->getBetaIncrease();
+		instance->beta += instance->getBetaIncrease();
 		break;
 	case GLUT_KEY_RIGHT:
-		instance->beta += instance->getBetaIncrease();
+		instance->beta -= instance->getBetaIncrease();
 		break;
 	case GLUT_KEY_UP:
 		instance->alpha += instance->getFirstAlphaIncrease();
@@ -96,7 +96,7 @@ void processSpecialKeys(int key, int xx, int yy) {
 		}
 		else
 		{
-			instance->setFirstAlphaIncrease(0.1);
+			instance->setFirstAlphaIncrease(0.01);
 		}
 		break;
 	case GLUT_KEY_DOWN:
@@ -107,7 +107,7 @@ void processSpecialKeys(int key, int xx, int yy) {
 		}
 		else
 		{
-			instance->setSecondAlphaIncrease(0.1);
+			instance->setSecondAlphaIncrease(0.01);
 		}
 		break;
 	}
@@ -154,19 +154,24 @@ void Scene::InitializeLibraries() {
 void Scene::InitializeScene() {
 	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
 
-	Model* table = new Model("table1.obj");
+	Model* table = new Model("table.obj");
 	Model* chicken = new Model("chicken.obj");
-	Model* plate = new Model("plate1.obj");
-	Model* book = new Model("book3.obj");
+	Model* plate = new Model("plate.obj");
+	Model* book = new Model("book.obj");
 	Model* cup = new Model("cup.obj");
 	Model* glass = new Model("glass.obj");
+	Model* saltPepper = new Model("salt-and-pepper.obj");
+	Model* cutlery = new Model("cutlery.obj");
 
 	models.push_back(table);
 	models.push_back(chicken);
 	models.push_back(book);
+	models.push_back(book);
 	models.push_back(cup);
 	models.push_back(glass);
 	models.push_back(plate);
+	models.push_back(saltPepper);
+	models.push_back(cutlery);
 
 	CreateVBO();
 	CreateShaders("tex.vert", "tex.frag");
@@ -175,12 +180,10 @@ void Scene::InitializeScene() {
 	LoadTexture(WoodTexture, "wood.png");
 	LoadTexture(PlainTexture, "plain.png");
 	LoadTexture(BookTexture, "go-set-a-watchman2.png");
+	LoadTexture(BookTexture2, "lotr.png");
 	LoadTexture(PagesTexture, "page.png");
-	LoadTexture(CupTexture, "blueCup.png");
 	LoadTexture(MarbleTexture, "marble.png");
 	LoadTexture(ChickenTexture, "chicken.png");
-	LoadTexture(ChickenORMTexture, "chickenORM.png");
-	LoadTexture(ChickenNormalTexture, "chickenNormal.png");
 
 	myMatrixLocation = glGetUniformLocation(ProgramId, "myMatrix");
 	viewLocation = glGetUniformLocation(ProgramId, "viewShader");
@@ -188,16 +191,6 @@ void Scene::InitializeScene() {
 	lightColorLoc = glGetUniformLocation(ProgramId, "lightColor");
 	lightPosLoc = glGetUniformLocation(ProgramId, "lightPos");
 	viewPosLoc = glGetUniformLocation(ProgramId, "viewPos");
-	shadowMatrixLocation = glGetUniformLocation(ProgramId, "shadowMatrix");
-
-	// shadow matrix
-	float D = 0.4f;
-	shadowMatrix = glm::make_mat4(new float[16]{
-		lightPosition.z + D, 0, 0, 0,
-		0, lightPosition.z + D, 0, 0,
-		-lightPosition.x, -lightPosition.y, D, -1,
-		-D * lightPosition.x, -D * lightPosition.y, -D * lightPosition.z, lightPosition.z
-	});
 }
 
 void Scene::CreateShaders(const char* vertShader, const char* fragShader) {
@@ -241,10 +234,6 @@ void Scene::RenderFunction() {
 	myMatrix *= glm::scale(glm::mat4(1.0f), glm::vec3(1 / 1.5f, 1 / 1.5f, 1 / 1.5f));
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 
-
-	glUniformMatrix4fv(shadowMatrixLocation, 1, GL_FALSE, &glm::mat4(1.0f)[0][0]);
-
-
 	// new texture for the object
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, WoodTexture);
@@ -266,10 +255,6 @@ void Scene::RenderFunction() {
 	myMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 6.6f, 0.0f));
 	myMatrix *= glm::scale(glm::mat4(1.0f), glm::vec3(1 / 30.0f, 1 / 30.0f, 1 / 30.0f));
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
-
-	
-	glUniformMatrix4fv(shadowMatrixLocation, 1, GL_FALSE, &glm::mat4(1.0f)[0][0]);
-
 
 	// new texture for the object
 	glActiveTexture(GL_TEXTURE0);
@@ -294,10 +279,6 @@ void Scene::RenderFunction() {
 	myMatrix =  translateBook * resizeBook;
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 
-
-	glUniformMatrix4fv(shadowMatrixLocation, 1, GL_FALSE, &glm::mat4(1.0f)[0][0]);
-
-
 	// new texture for the object
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, PagesTexture);
@@ -320,6 +301,41 @@ void Scene::RenderFunction() {
 	////////////////////////////////////////////////////////////////////////////////////////
 
 	////////////////////////////////////////
+	// /////////// BOOK 2
+	////////////////////////////////////////
+	i++;
+	glBindVertexArray(models[i]->VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, models[i]->VAO);
+
+	// set the object's position
+	myMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(4, 6.5, 1));
+	myMatrix *= glm::scale(glm::mat4(1.0f), glm::vec3(0.007, 0.007, 0.007));
+	myMatrix *= glm::rotate(glm::mat4(1.0f), glm::radians(11.0f), glm::vec3(1, 0, 0));
+	myMatrix *= glm::rotate(glm::mat4(1.0f), glm::radians(45.0f), glm::vec3(0, 1, 0));
+	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
+
+	// new texture for the object
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, PagesTexture);
+	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);
+
+	coverMeshSize = models[i]->MeshVertices[2].size() / 8;
+	totalVerticesSize = models[i]->Vertices.size() / 8;
+
+	//draw the book pages
+	glDrawArrays(GL_TRIANGLES, 0, totalVerticesSize - coverMeshSize);
+
+	// new texture for the book cover
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, BookTexture2);
+	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);
+
+	// draw the book cover
+	glDrawArrays(GL_TRIANGLES, totalVerticesSize - coverMeshSize, coverMeshSize);
+
+	////////////////////////////////////////////////////////////////////////////////////////
+
+	////////////////////////////////////////
 	// /////////// CUP
 	////////////////////////////////////////
 	i ++;
@@ -327,14 +343,10 @@ void Scene::RenderFunction() {
 	glBindBuffer(GL_ARRAY_BUFFER, models[i]->VAO);
 
 	// set the object's position
-	glm::mat4 resizeCup = glm::scale(glm::mat4(1.0f), glm::vec3(0.3, 0.3, 0.3));
-	glm::mat4 translateCup = glm::translate(glm::mat4(1.0f), glm::vec3(-4.0, 6.5, -1.0));
+	glm::mat4 resizeCup = glm::scale(glm::mat4(1.0f), glm::vec3(0.25, 0.25, 0.25));
+	glm::mat4 translateCup = glm::translate(glm::mat4(1.0f), glm::vec3(-4.25, 6.5, -1.0));
 	myMatrix = translateCup * resizeCup;
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
-
-
-	glUniformMatrix4fv(shadowMatrixLocation, 1, GL_FALSE, &glm::mat4(1.0f)[0][0]);
-
 
 	// new texture for the object
 	glActiveTexture(GL_TEXTURE0);
@@ -343,10 +355,6 @@ void Scene::RenderFunction() {
 
 	// draw the object
 	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
-
-
-	//glUniformMatrix4fv(shadowMatrixLocation, 1, GL_FALSE, &shadowMatrix[0][0]);
-	//glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
 
 	////////////////////////////////////////////////////////////////////////////////////////
 
@@ -360,11 +368,9 @@ void Scene::RenderFunction() {
 
 	// set the glass's position
 	glm::mat4 resizeGlass = glm::scale(glm::mat4(1.0f), glm::vec3(10, 10, 10));
-	glm::mat4 translateGlass = glm::translate(glm::mat4(1.0f), glm::vec3(-4, 6.2, -1.5));
+	glm::mat4 translateGlass = glm::translate(glm::mat4(1.0f), glm::vec3(-4.25, 6.2, -1.5));
 	myMatrix = translateGlass * resizeGlass;
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
-
-	glUniformMatrix4fv(shadowMatrixLocation, 1, GL_FALSE, &glm::mat4(1.0f)[0][0]);
 
 	// new texture for the object
 	glActiveTexture(GL_TEXTURE0);
@@ -394,13 +400,60 @@ void Scene::RenderFunction() {
 	myMatrix *= glm::scale(glm::mat4(1.0f), glm::vec3(1 / 4.0f, 1 / 4.0f, 1 / 4.0f));
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 
-
-	glUniformMatrix4fv(shadowMatrixLocation, 1, GL_FALSE, &glm::mat4(1.0f)[0][0]);
-
-
 	// new texture for the object
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, MarbleTexture);
+	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);
+
+	// draw the object
+	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
+
+	////////////////////////////////////////////////////////////////////////////////////////
+
+	////////////////////////////////////////
+	// /////////// SALT AND PEPPER
+	////////////////////////////////////////
+	i++;
+	glBindVertexArray(models[i]->VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, models[i]->VAO);
+
+	// set the object's position
+	myMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-2.0f, 6.2f, 2.0f));
+	myMatrix *= glm::rotate(glm::mat4(1.0f), glm::radians(-55.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	myMatrix *= glm::scale(glm::mat4(1.0f), glm::vec3(7.0f, 7.0f, 7.0f));
+	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
+
+	// new texture for the object
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, PlainTexture);
+	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_SRC_ALPHA);
+
+	// draw the object
+	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
+
+	glDisable(GL_BLEND);
+
+	////////////////////////////////////////////////////////////////////////////////////////
+
+	////////////////////////////////////////
+	// /////////// CUTLERY
+	////////////////////////////////////////
+	i++;
+	glBindVertexArray(models[i]->VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, models[i]->VAO);
+
+	// set the object's position
+	myMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 1, 0));
+	myMatrix *= glm::translate(glm::mat4(1.0f), glm::vec3(3.0f, 6.22f, 2.0f));
+	myMatrix *= glm::scale(glm::mat4(1.0f), glm::vec3(0.1f, 0.1f, 0.1f));
+	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
+
+	// new texture for the object
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, PlainTexture);
 	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);
 
 	// draw the object

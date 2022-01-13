@@ -24,9 +24,8 @@ private:
 public:
 	float const PI = 3.141592;
 
-	// elemente pentru matricea de vizualizare
-	float Obsx = 0.0, Obsy = 10.0, Obsz = -10;
-	float Refx = 0.0f, Refy = 6.0f, Refz = 0.0f;
+	float Obsx = 0.0, Obsy = -100.0, Obsz = -10;
+	float Refx = 0.0f, Refy = 10.0f, Refz = 0.0f;
 	float Vx = 0.0, Vy = -1.0, Vz = 0.0;
 	
 	float 
@@ -36,33 +35,32 @@ public:
 		ywmin = -200, ywmax = 200, 
 		znear = 1, zfar = -100, 
 		fov = 30;
-	float alpha = 0.0f, beta = 0.0f, distance = 10.0f;
-
+	float alpha = 0.3f, beta = -83.25f, distance = 10.0f;
 
 	glm::vec3 Obs, PctRef, Vert;
 	glm::mat4 view, projection, myMatrix;
-	glm::mat4 shadowMatrix;
 
+	// textures
 	GLuint
 		LavaTexture,
 		WoodTexture,
 		PlainTexture,
 		BookTexture,
-		CupTexture,
+		BookTexture2,
 		MarbleTexture,
 		ChickenTexture,
-		ChickenORMTexture,
-		ChickenNormalTexture,
-		PagesTexture,
+		PagesTexture;
+
+	// for the shaders
+	GLuint
 		ProgramId,
 		viewLocation,
 		projLocation,
 		myMatrixLocation,
-		lightColorLoc, lightPosLoc, viewPosLoc,
-		shadowMatrixLocation;
+		lightColorLoc, lightPosLoc, viewPosLoc;
 
 	glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
-	glm::vec3 lightPosition = glm::vec3(1000.0f, 1000.0f, 1000.0f);
+	glm::vec3 lightPosition = glm::vec3(-1000.0f, 1000.0f, -1000.0f);
 
 	std::vector<Model*> models;
 

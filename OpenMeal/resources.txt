@@ -16,5 +16,11 @@ https://www.cgtrader.com/free-3d-models/furniture/tableware/empty-glass-01
 Book model:
 https://www.cgtrader.com/free-3d-models/sports/book/magazine-casa-cor
 
+Salt and pepper model:
+https://www.cgtrader.com/free-3d-models/household/kitchenware/salt-pepper-shakers-5cacce8c-2732-495a-a763-185902c48c15
+
+Cutlery model (edited):
+https://www.cgtrader.com/free-3d-models/furniture/kitchen/cutlery-spoon-fork-and-knife
+
 Obj File Parser:
 https://github.com/Bly7/OBJ-Loader
