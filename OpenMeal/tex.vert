@@ -17,12 +17,12 @@ uniform mat4 shadowMatrix;
 uniform mat4 projectionShader;
 uniform vec3 lightPos;
 uniform vec3 viewPos;
-uniform int codCol;
+uniform bool isShadow;
 
 void main(void)
 {
     gl_Position = projectionShader * viewShader * myMatrix * vec4(in_Position, 1);
-    if(codCol == 1) {
+    if(isShadow == true) {
        gl_Position = projectionShader * viewShader * shadowMatrix * myMatrix * vec4(in_Position, 1);
     }
     tex_Coord = vec2(texCoord.x, texCoord.y);
