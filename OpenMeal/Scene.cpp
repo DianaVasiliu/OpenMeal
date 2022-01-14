@@ -153,6 +153,27 @@ void Scene::InitializeLibraries() {
 	glutSpecialFunc(processSpecialKeys);
 	glutCloseFunc(cleanupCallback);
 }
+void Scene::ComputeShadowMatrix(float D) {
+	shadowMatrix[0][0] = lightPosition.y + D;
+	shadowMatrix[0][1] = 0;
+	shadowMatrix[0][2] = 0;
+	shadowMatrix[0][3] = 0;
+
+	shadowMatrix[1][0] = -lightPosition.x;
+	shadowMatrix[1][1] = D;
+	shadowMatrix[1][2] = -lightPosition.z;
+	shadowMatrix[1][3] = -1;
+
+	shadowMatrix[2][0] = 0;
+	shadowMatrix[2][1] = 0;
+	shadowMatrix[2][2] = lightPosition.y + D;
+	shadowMatrix[2][3] = 0;
+
+	shadowMatrix[3][0] = -D * lightPosition.x;
+	shadowMatrix[3][1] = -D * lightPosition.y;
+	shadowMatrix[3][2] = -D * lightPosition.z;
+	shadowMatrix[3][3] = lightPosition.y;
+}
 
 void Scene::InitializeScene() {
 	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
@@ -188,7 +209,7 @@ void Scene::InitializeScene() {
 	LoadTexture(WoodTexture, "wood.png");
 	LoadTexture(PlainTexture, "plain.png");
 	LoadTexture(BookTexture, "go-set-a-watchman2.png");
-	LoadTexture(BookTexture2, "lotr.png");
+	LoadTexture(BookTexture2, "themartian6.png");
 	LoadTexture(PagesTexture, "page.png");
 	LoadTexture(MarbleTexture, "marble.png");
 	LoadTexture(ChickenTexture, "chicken.png");
@@ -200,6 +221,9 @@ void Scene::InitializeScene() {
 	lightColorLoc = glGetUniformLocation(ProgramId, "lightColor");
 	lightPosLoc = glGetUniformLocation(ProgramId, "lightPos");
 	viewPosLoc = glGetUniformLocation(ProgramId, "viewPos");
+	shadowMatrixLocation = glGetUniformLocation(ProgramId, "shadowMatrix");
+	codColLocation = glGetUniformLocation(ProgramId, "codCol");
+	shadowColorLoc = glGetUniformLocation(ProgramId, "shadowColor");
 }
 
 void Scene::CreateShaders(const char* vertShader, const char* fragShader) {
@@ -207,7 +231,22 @@ void Scene::CreateShaders(const char* vertShader, const char* fragShader) {
 	ProgramId = LoadShaders(vertShader, fragShader);
 	glUseProgram(ProgramId);
 }
-
+void Scene::EnableShadow() {
+	codCol = 1;
+	glUniform1i(codColLocation, codCol);
+	glUniformMatrix4fv(shadowMatrixLocation, 1, GL_FALSE, &shadowMatrix[0][0]);
+}
+void Scene::DisableShadow() {
+	codCol = 0;
+	glUniform1i(codColLocation, codCol);
+}
+void Scene::DrawShadow(float D, int i, glm::vec3 shadowColor) {
+	ComputeShadowMatrix(D);
+	EnableShadow();
+	glUniform3f(shadowColorLoc, shadowColor.x, shadowColor.y, shadowColor.z);
+	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
+	DisableShadow();
+}
 void Scene::RenderFunction() {
 	glUseProgram(ProgramId);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -217,6 +256,8 @@ void Scene::RenderFunction() {
 	Obsx = Refx + distance * cos(alpha) * cos(beta);
 	Obsy = Refy + distance * sin(alpha);
 	Obsz = Refz + distance * cos(alpha) * sin(beta);
+
+	DisableShadow();
 	
 	Obs = glm::vec3(Obsx, Obsy, Obsz);
 	PctRef = glm::vec3(Refx, Refy, Refz);
@@ -253,6 +294,9 @@ void Scene::RenderFunction() {
 
 	// draw the object
 	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
+
+	// draw the shadow
+	DrawShadow(- FLOOR_Y, i, lightShadow);
 
 	////////////////////////////////////////////////////////////////////////////////////////
 
@@ -298,6 +342,9 @@ void Scene::RenderFunction() {
 	// draw the object
 	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
 
+	//draw the shadow
+	DrawShadow( - TABLE_Y, i, darkShadow);
+
 	////////////////////////////////////////////////////////////////////////////////////////
 
 	////////////////////////////////////////
@@ -309,7 +356,7 @@ void Scene::RenderFunction() {
 
 	// set the object's position
 	glm::mat4 resizeBook = glm::scale(glm::mat4(1.0f), glm::vec3(0.007, 0.007, 0.007));
-	glm::mat4 translateBook = glm::translate(glm::mat4(1.0f), glm::vec3(4, 6.2, 0));
+	glm::mat4 translateBook = glm::translate(glm::mat4(1.0f), glm::vec3(4, 6.13, 0));
 	myMatrix =  translateBook * resizeBook;
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 
@@ -332,6 +379,9 @@ void Scene::RenderFunction() {
 	// draw the book cover
 	glDrawArrays(GL_TRIANGLES, totalVerticesSize - coverMeshSize, coverMeshSize);
 
+	//draw the shadow
+	DrawShadow( - TABLE_Y, i, darkShadow);
+
 	////////////////////////////////////////////////////////////////////////////////////////
 
 	////////////////////////////////////////
@@ -342,10 +392,15 @@ void Scene::RenderFunction() {
 	glBindBuffer(GL_ARRAY_BUFFER, models[i]->VAO);
 
 	// set the object's position
-	myMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(4, 6.5, 1));
+	myMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(4, 6.43, 1));
 	myMatrix *= glm::scale(glm::mat4(1.0f), glm::vec3(0.007, 0.007, 0.007));
-	myMatrix *= glm::rotate(glm::mat4(1.0f), glm::radians(11.0f), glm::vec3(1, 0, 0));
-	myMatrix *= glm::rotate(glm::mat4(1.0f), glm::radians(45.0f), glm::vec3(0, 1, 0));
+	glm::vec3 firstAxis = glm::vec3(1, 0, 0);
+	glm::vec3 secondAxis = glm::vec3(0, 1, 0);
+	glm::quat firstRotation = glm::angleAxis(glm::radians(11.0f), firstAxis);
+	glm::quat secondRotation = glm::angleAxis(glm::radians(45.0f), secondAxis);
+	glm::quat combinedRotation = firstRotation * secondRotation;
+	glm::mat4 rotateBook2 = toMat4(combinedRotation);
+	myMatrix *= rotateBook2;
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 
 	// new texture for the object
@@ -367,6 +422,9 @@ void Scene::RenderFunction() {
 	// draw the book cover
 	glDrawArrays(GL_TRIANGLES, totalVerticesSize - coverMeshSize, coverMeshSize);
 
+	//draw the shadow
+	DrawShadow( - TABLE_Y, i, darkShadow);
+
 	////////////////////////////////////////////////////////////////////////////////////////
 
 	////////////////////////////////////////
@@ -378,7 +436,7 @@ void Scene::RenderFunction() {
 
 	// set the object's position
 	glm::mat4 resizeCup = glm::scale(glm::mat4(1.0f), glm::vec3(0.25, 0.25, 0.25));
-	glm::mat4 translateCup = glm::translate(glm::mat4(1.0f), glm::vec3(-4.25, 6.5, -1.0));
+	glm::mat4 translateCup = glm::translate(glm::mat4(1.0f), glm::vec3(-4.25, 6.44, -1.0));
 	myMatrix = translateCup * resizeCup;
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 
@@ -389,6 +447,9 @@ void Scene::RenderFunction() {
 
 	// draw the object
 	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
+
+	//draw the shadow
+	DrawShadow( - TABLE_Y, i, darkShadow);
 
 	////////////////////////////////////////////////////////////////////////////////////////
 	
@@ -413,6 +474,9 @@ void Scene::RenderFunction() {
 	// draw the object
 	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
 
+	//draw the shadow
+	DrawShadow( - TABLE_Y, i, darkShadow);
+
 	////////////////////////////////////////////////////////////////////////////////////////
 
 	////////////////////////////////////////
@@ -424,7 +488,7 @@ void Scene::RenderFunction() {
 
 	// set the object's position
 	myMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 1, 0));
-	myMatrix *= glm::translate(glm::mat4(1.0f), glm::vec3(3.0f, 6.22f, 2.0f));
+	myMatrix *= glm::translate(glm::mat4(1.0f), glm::vec3(3.0f, 6.20f, 2.0f));
 	myMatrix *= glm::scale(glm::mat4(1.0f), glm::vec3(0.1f, 0.1f, 0.1f));
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 
@@ -435,6 +499,9 @@ void Scene::RenderFunction() {
 
 	// draw the object
 	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
+
+	//draw the shadow
+	DrawShadow( - TABLE_Y, i, darkShadow);
 
 	/// TRANSPARENT OBJECTS
 	
@@ -451,7 +518,7 @@ void Scene::RenderFunction() {
 
 	// set the glass's position
 	glm::mat4 resizeGlass = glm::scale(glm::mat4(1.0f), glm::vec3(10, 10, 10));
-	glm::mat4 translateGlass = glm::translate(glm::mat4(1.0f), glm::vec3(-4.25, 6.2, -1.5));
+	glm::mat4 translateGlass = glm::translate(glm::mat4(1.0f), glm::vec3(-4.25, TABLE_Y, -1.5));
 	myMatrix = translateGlass * resizeGlass;
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 
@@ -465,6 +532,11 @@ void Scene::RenderFunction() {
 	// draw the glass
 	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
 
+	// draw the shadow
+	glDisable(GL_BLEND);
+	DrawShadow( - TABLE_Y, i, darkShadow);
+	glEnable(GL_BLEND);
+
 	////////////////////////////////////////////////////////////////////////////////////////
 
 	////////////////////////////////////////
@@ -475,7 +547,7 @@ void Scene::RenderFunction() {
 	glBindBuffer(GL_ARRAY_BUFFER, models[i]->VAO);
 
 	// set the object's position
-	myMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-2.0f, 6.2f, 2.0f));
+	myMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-2.0f, TABLE_Y, 2.0f));
 	myMatrix *= glm::rotate(glm::mat4(1.0f), glm::radians(-55.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	myMatrix *= glm::scale(glm::mat4(1.0f), glm::vec3(7.0f, 7.0f, 7.0f));
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
@@ -489,6 +561,11 @@ void Scene::RenderFunction() {
 
 	// draw the object
 	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
+
+	// draw the shadow
+	glDisable(GL_BLEND);
+	DrawShadow( - TABLE_Y, i, darkShadow);
+	glEnable(GL_BLEND);
 
 	///  END TRANSPARENT OBJECTS
 
@@ -504,7 +581,7 @@ void Scene::RenderFunction() {
 	glBindBuffer(GL_ARRAY_BUFFER, models[i]->VAO);
 
 	// set the object's position
-	myMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.3f, 0.0f));
+	myMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, FLOOR_Y, 0.0f));
 	myMatrix *= glm::rotate(glm::mat4(1.0f), glm::radians(-40.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	myMatrix *= glm::scale(glm::mat4(1.0f), glm::vec3(1 / 1.5f, 1 / 1.5f, 1 / 1.5f));
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
@@ -516,6 +593,9 @@ void Scene::RenderFunction() {
 
 	// draw the object
 	glDrawArrays(GL_TRIANGLES, 0, models[i]->verticesCount);
+
+	// draw the shadow
+	DrawShadow(- FLOOR_Y, i, lightShadow);
 
 	glDisable(GL_TEXTURE_2D);
 	glutSwapBuffers();
