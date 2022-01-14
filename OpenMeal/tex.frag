@@ -8,6 +8,8 @@ in vec3 inViewPos;
 
 uniform sampler2D myTexture;
 uniform vec3 lightColor;
+uniform vec3 shadowColor;
+uniform int codCol; 
  
 out vec4 out_Color;
 
@@ -40,4 +42,7 @@ void main(void)
 
     vec3 result = emission + (ambient_term + diffuse_term + specular_term);
 	out_Color = vec4(result, 0.5f);
+    if(codCol == 1) {
+       out_Color=vec4 (shadowColor, 0.5);
+    }
 }
