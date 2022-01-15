@@ -25,5 +25,8 @@ https://www.cgtrader.com/free-3d-models/furniture/kitchen/cutlery-spoon-fork-and
 Table cloth model (edited):
 https://sketchfab.com/3d-models/fnaf-table-5449d541f2954577a6f3e983fb2d00a5
 
+Wine bottle and glass:
+https://sketchfab.com/3d-models/glass-of-wine-da0535a0e553491c8a8b7f07eba6b45e
+
 Obj File Parser:
 https://github.com/Bly7/OBJ-Loader

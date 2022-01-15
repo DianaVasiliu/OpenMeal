@@ -50,9 +50,11 @@ private:
 	glm::vec3 darkShadow = glm::vec3(0.02f, 0.0625f, 0.0156f);
 	glm::vec3 lightPosition = glm::vec3(500.0f, 500.0f, 350.0f);
 
+	GLuint isTextured = true;
+	glm::vec3 color = glm::vec3(0.5f, 0.5f, 0.5f);
+
 	std::vector<Model*> models;
-public:
-	
+public:	
 
 	// textures
 	GLuint
@@ -63,7 +65,8 @@ public:
 		MarbleTexture,
 		ChickenTexture,
 		ClothTexture,
-		PagesTexture;
+		PagesTexture,
+		WineTexture;
 
 	// for the shaders
 	GLuint
@@ -72,7 +75,8 @@ public:
 		projLocation,
 		myMatrixLocation,
 		lightColorLoc, lightPosLoc, viewPosLoc, shadowColorLoc,
-		shadowMatrixLocation, isShadowLocation;
+		shadowMatrixLocation, isShadowLocation,
+		isTexturedLocation, colorLocation;
 
 	// setters
 	void setFirstAlphaIncrease(float);

@@ -10,12 +10,21 @@ uniform sampler2D myTexture;
 uniform vec3 lightColor;
 uniform vec3 shadowColor;
 uniform bool isShadow; 
+uniform bool isTextured;
+uniform vec3 color;
  
 out vec4 out_Color;
 
 void main(void)
 {
-	vec3 objectColor = texture(myTexture, tex_Coord).xyz;
+    vec3 objectColor;
+
+    if (isTextured == true) {
+	    objectColor = texture(myTexture, tex_Coord).xyz;
+    }
+    else {
+        objectColor = color;
+    }
 
 	// Ambient
     float ambientStrength = 0.5f;
@@ -38,11 +47,15 @@ void main(void)
     vec3 specular_light = specularStrength * lightColor;
     vec3 specular_term = spec * specular_light * objectColor;
 
+    // Emission
     vec3 emission = vec3(0.0, 0.0, 0.0);
 
     vec3 result = emission + (ambient_term + diffuse_term + specular_term);
-	out_Color = vec4(result, 0.5f);
-    if(isShadow == true) {
+    
+    if (isShadow == true) {
        out_Color=vec4 (shadowColor, 0.5);
+    }
+    else {
+	    out_Color = vec4(result, 0.5f);
     }
 }

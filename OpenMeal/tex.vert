@@ -21,10 +21,13 @@ uniform bool isShadow;
 
 void main(void)
 {
-    gl_Position = projectionShader * viewShader * myMatrix * vec4(in_Position, 1);
-    if(isShadow == true) {
-       gl_Position = projectionShader * viewShader * shadowMatrix * myMatrix * vec4(in_Position, 1);
+    if (isShadow == true) {
+        gl_Position = projectionShader * viewShader * shadowMatrix * myMatrix * vec4(in_Position, 1);
     }
+    else {
+        gl_Position = projectionShader * viewShader * myMatrix * vec4(in_Position, 1);
+    }
+
     tex_Coord = vec2(texCoord.x, texCoord.y);
     FragPos = vec3(gl_Position);
     Normal = mat3(projectionShader * viewShader * myMatrix) * in_Normal;

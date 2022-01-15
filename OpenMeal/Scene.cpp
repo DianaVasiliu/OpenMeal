@@ -77,9 +77,10 @@ void Scene::InitializeScene() {
 	Model* glass = new Model("Assets/OBJ/glass.obj");
 	Model* saltPepper = new Model("Assets/OBJ/salt-and-pepper.obj");
 	Model* cutlery = new Model("Assets/OBJ/cutlery.obj");
-	Model* burger = new Model("Assets/OBJ/burger.obj");
 	Model* tableCloth = new Model("Assets/OBJ/cloth.obj");
 	Model* ground = new Model("Assets/OBJ/ground.obj");
+	Model* wine = new Model("Assets/OBJ/wine.obj");
+	Model* wineGlass = new Model("Assets/OBJ/wineGlass.obj");
 
 	models.push_back(tableCloth);
 	models.push_back(ground);
@@ -89,6 +90,9 @@ void Scene::InitializeScene() {
 	models.push_back(cup);
 	models.push_back(plate);
 	models.push_back(cutlery);
+	models.push_back(wine);
+	models.push_back(wineGlass);
+	//models.push_back(wineGlass);
 	models.push_back(glass);
 	models.push_back(saltPepper);
 	models.push_back(table);
@@ -104,6 +108,7 @@ void Scene::InitializeScene() {
 	LoadTexture(MarbleTexture, "Assets/Textures/marble.png");
 	LoadTexture(ChickenTexture, "Assets/Textures/chicken.png");
 	LoadTexture(ClothTexture, "Assets/Textures/cloth.png");
+	LoadTexture(WineTexture, "Assets/Textures/wineBottle.png");
 
 	myMatrixLocation = glGetUniformLocation(ProgramId, "myMatrix");
 	viewLocation = glGetUniformLocation(ProgramId, "viewShader");
@@ -114,6 +119,8 @@ void Scene::InitializeScene() {
 	shadowMatrixLocation = glGetUniformLocation(ProgramId, "shadowMatrix");
 	isShadowLocation = glGetUniformLocation(ProgramId, "isShadow");
 	shadowColorLoc = glGetUniformLocation(ProgramId, "shadowColor");
+	isTexturedLocation = glGetUniformLocation(ProgramId, "isTextured");
+	colorLocation = glGetUniformLocation(ProgramId, "color");
 }
 
 void Scene::CreateShaders(const char* vertShader, const char* fragShader) {
@@ -141,6 +148,9 @@ void Scene::DrawShadow(float D, int i, glm::vec3 shadowColor) {
 }
 
 void Scene::DrawObject(int i, GLuint Texture) {
+	glUniform1i(isTexturedLocation, isTextured);
+	glUniform3f(colorLocation, color.x, color.y, color.z);
+
 	glBindVertexArray(models[i]->VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, models[i]->VAO);
 
@@ -154,6 +164,9 @@ void Scene::DrawObject(int i, GLuint Texture) {
 }
 
 void Scene::DrawMesh(int i, int start, int count, GLuint Texture) {
+	glUniform1i(isTexturedLocation, isTextured);
+	glUniform3f(colorLocation, color.x, color.y, color.z);
+
 	glBindVertexArray(models[i]->VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, models[i]->VAO);
 
@@ -202,7 +215,7 @@ void Scene::RenderFunction() {
 	// set the object's position
 	myMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 1.4f, -0.2f));
 	myMatrix *= glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0, 1, 0));
-	myMatrix *= glm::scale(glm::mat4(1.0f), glm::vec3(2.0f, 2.0f, 2.6f));
+	myMatrix *= glm::scale(glm::mat4(1.0f), glm::vec3(3.0f, 2.0f, 4.0f));
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 
 	DrawObject(i, ClothTexture);
@@ -317,6 +330,57 @@ void Scene::RenderFunction() {
 	DrawObject(i, PlainTexture);
 	DrawShadow(-TABLE_Y, i, darkShadow);
 
+	////////////////////////////////////////
+	// /////////// WINE
+	////////////////////////////////////////
+	i++;
+
+	// set the object's position
+	myMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(4.0f, 6.20f, 3.0f));
+	myMatrix *= glm::scale(glm::mat4(1.0f), glm::vec3(0.2f, 0.2f, 0.2f));
+	myMatrix *= glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 1, 0));
+	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
+
+	int bottleMeshSize = models[i]->MeshVertices[0].size() / 8;
+	int corkMeshSize = models[i]->MeshVertices[1].size() / 8;
+	int labelMeshSize = models[i]->MeshVertices[2].size() / 8;
+	
+	isTextured = false;
+	color = glm::vec3(0.1f, 0.15f, 0.1f);
+	DrawMesh(i, 0, bottleMeshSize, ClothTexture);
+	color = glm::vec3(0.3f, 0.0f, 0.0f);
+	DrawMesh(i, bottleMeshSize, corkMeshSize, PlainTexture);
+	isTextured = true;
+	DrawMesh(i, bottleMeshSize + corkMeshSize, labelMeshSize, WineTexture);
+	DrawShadow(-TABLE_Y, i, darkShadow);
+
+	////////////////////////////////////////
+	// /////////// WINE GLASS 1
+	////////////////////////////////////////
+	i++;
+
+	// set the object's position
+	myMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(4.0f, 6.20f, 3.0f));
+	myMatrix *= glm::scale(glm::mat4(1.0f), glm::vec3(0.2f, 0.2f, 0.2f));
+	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
+
+	int MeshSize1 = models[i]->MeshVertices[0].size() / 8;
+	int MeshSize2 = models[i]->MeshVertices[1].size() / 8;
+	
+	isTextured = false;
+	
+	color = glm::vec3(0.3f, 0.0f, 0.0f);
+	DrawMesh(i, MeshSize1, MeshSize2, PlainTexture);
+
+	color = glm::vec3(0.7f, 0.7f, 0.7f);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
+	DrawMesh(i, 0, MeshSize1, PlainTexture);
+	glDisable(GL_BLEND);
+
+	DrawShadow(-TABLE_Y, i, darkShadow);
+
+	isTextured = true;
 	/// TRANSPARENT OBJECTS
 	
 	glEnable(GL_BLEND);
@@ -371,8 +435,8 @@ void Scene::RenderFunction() {
 
 	// set the object's position
 	myMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, FLOOR_Y, 0.0f));
+	myMatrix *= glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1 / 1.5f, 1.0f));
 	myMatrix *= glm::rotate(glm::mat4(1.0f), glm::radians(-40.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-	myMatrix *= glm::scale(glm::mat4(1.0f), glm::vec3(1 / 1.5f, 1 / 1.5f, 1 / 1.5f));
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 
 	DrawObject(i, WoodTexture);

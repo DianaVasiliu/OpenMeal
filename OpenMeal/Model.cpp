@@ -68,4 +68,8 @@ Model::Model(const char* modelName):
 	}
 
 	meshCount = MeshVertices.size();
+	//std::cout << meshCount << "\n";
+	//for (int i = 0; i < meshCount; i++) {
+	//	std::cout << MeshVertices[i].size() / 8 << "\n";
+	//}
 }
