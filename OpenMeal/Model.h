@@ -1,11 +1,12 @@
 #pragma once
 
 #include <vector>
+
 #include <GL/glew.h>
 #include <GL/freeglut.h>
-#include "OBJ_Loader.h"
 
-#include "glm/glm/glm.hpp"  
+#include "LIBRARIES/OBJ_Loader.h"
+#include "LIBRARIES/glm/glm/glm.hpp"  
 
 class Model {
 private:

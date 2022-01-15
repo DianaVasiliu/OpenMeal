@@ -5,12 +5,12 @@
 #include <vector>
 #include <GL/glew.h>
 #include <GL/freeglut.h>
-#include "glm/glm/glm.hpp"  
-#include "glm/glm/gtc/matrix_transform.hpp"
-#include "glm/glm/gtx/transform.hpp"
-#include "glm/glm/gtc/type_ptr.hpp"
-#include "glm/glm/gtc/quaternion.hpp"
-#include "glm/glm/gtx/quaternion.hpp"
+#include "LIBRARIES/glm/glm/glm.hpp"  
+#include "LIBRARIES/glm/glm/gtc/matrix_transform.hpp"
+#include "LIBRARIES/glm/glm/gtx/transform.hpp"
+#include "LIBRARIES/glm/glm/gtc/type_ptr.hpp"
+#include "LIBRARIES/glm/glm/gtc/quaternion.hpp"
+#include "LIBRARIES/glm/glm/gtx/quaternion.hpp"
 
 class Scene {
 
@@ -22,14 +22,13 @@ private:
 	float betaIncrease = 0.01;
 	float firstAlphaIncrease = 0.01;
 	float secondAlphaIncrease = 0.01;
-
-public:
+	
 	float const PI = 3.141592;
-	int codCol;
+	bool isShadow;
 	float Obsx = 0.0, Obsy = -100.0, Obsz = -10;
 	float Refx = 0.0f, Refy = 10.0f, Refz = 0.0f;
 	float Vx = 0.0, Vy = -1.0, Vz = 0.0;
-	
+
 	float 
 		width = 800, 
 		height = 600, 
@@ -44,11 +43,21 @@ public:
 	float shadowMatrix[4][4];
 
 	float TABLE_Y = 6.13;
-	float FLOOR_Y = - 0.25;
+	float FLOOR_Y = -0.25;
+
+	glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+	glm::vec3 lightShadow = glm::vec3(0.66f, 0.66f, 0.66f);
+	glm::vec3 darkShadow = glm::vec3(0.02f, 0.0625f, 0.0156f);
+	glm::vec3 lightPosition = glm::vec3(500.0f, 500.0f, 350.0f);
+
+	GLuint isTextured = true;
+	glm::vec3 color = glm::vec3(0.5f, 0.5f, 0.5f);
+
+	std::vector<Model*> models;
+public:	
 
 	// textures
 	GLuint
-		LavaTexture,
 		WoodTexture,
 		PlainTexture,
 		BookTexture,
@@ -56,7 +65,8 @@ public:
 		MarbleTexture,
 		ChickenTexture,
 		ClothTexture,
-		PagesTexture;
+		PagesTexture,
+		WineTexture;
 
 	// for the shaders
 	GLuint
@@ -65,22 +75,38 @@ public:
 		projLocation,
 		myMatrixLocation,
 		lightColorLoc, lightPosLoc, viewPosLoc, shadowColorLoc,
-		shadowMatrixLocation, codColLocation;
+		shadowMatrixLocation, isShadowLocation,
+		isTexturedLocation, colorLocation;
 
-	glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
-	glm::vec3 lightShadow = glm::vec3(0.66f, 0.66f, 0.66f);
-	glm::vec3 darkShadow = glm::vec3(0.02f, 0.0625f, 0.0156f);
-	glm::vec3 lightPosition = glm::vec3(-500.0f, 500.0f, -350.0f);
+	// setters
+	void setFirstAlphaIncrease(float);
+	void setSecondAlphaIncrease(float);
+	void setVx(float);
+	void setVy(float);
+	void setVz(float);
+	void setDistance(float);
+	void setRefx(float);
+	void setRefy(float);
+	void setRefz(float);
+	void setAlpha(float);
+	void setBeta(float);
 
-	std::vector<Model*> models;
-
+	// getters
 	static Scene* getInstance();
 	float getDistanceIncrease() const;
 	float getBetaIncrease() const;
 	float getFirstAlphaIncrease() const;
 	float getSecondAlphaIncrease() const;
-	void setFirstAlphaIncrease(float);
-	void setSecondAlphaIncrease(float);
+	float getVx() const;
+	float getVy() const;
+	float getVz() const;
+	float getDistance() const;
+	float getRefx() const;
+	float getRefy() const;
+	float getRefz() const;
+	float getAlpha() const;
+	float getBeta() const;
+	float getPI() const;
 
 	void InitializeLibraries();
 	void InitializeScene();
@@ -89,6 +115,9 @@ public:
 	void EnableShadow();
 	void DisableShadow();
 	void DrawShadow(float, int, glm::vec3);
+	void DrawObject(int, GLuint);
+	void DrawMesh(int, int, int, GLuint);
+	void CalculatePositionVariables();
 	void RenderFunction();
 	void CreateVBO();
 	void DestroyShaders();
